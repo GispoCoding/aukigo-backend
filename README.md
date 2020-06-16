@@ -15,7 +15,7 @@ Start the backend with:
 docker-compose -f docker-compose.yml up -d --build
 ``` 
 
-And it can be accessed from http://localhost:8001/
+Django can be accessed from http://localhost:8001/ and pg_tileserv from http://localhost:7800
 
 
 ### Production mode

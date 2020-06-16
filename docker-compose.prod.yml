@@ -23,6 +23,19 @@ services:
     expose:
       - 6379
 
+  pg_tileserv:
+    # Conf file in /etc/pg_tileserv.toml, could be mounted if need to modify
+    image: pramsey/pg_tileserv:20200612
+    environment:
+      - DATABASE_URL=postgresql://${SQL_USER:-postgres}:${SQL_PASSWORD:-postgres}@db/${SQL_DATABASE:-covid_db}
+    depends_on:
+      - db
+    expose:
+      - 7800
+      # - 7801 #https
+    restart:
+      unless-stopped
+
   db:
     image: kartoza/postgis:12.1
     volumes:
