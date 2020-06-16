@@ -1,0 +1,38 @@
+version: '3.7'
+
+services:
+  web:
+    build: ./osmserv
+    command: sh -c "celery -A osmserv worker -B -l debug & python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./osmserv/:/usr/src/app/
+    ports:
+      - 8001:8000
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+    links:
+      - redis
+
+  redis:
+    image: redis:5.0.8-alpine
+    ports:
+      - '6379:6379'
+
+
+  # Connecting: docker-compose exec db psql -U osm_dev -d osm_dev -h localhost
+  db:
+    image: kartoza/postgis:12.1
+    volumes:
+      - postgres_covid19_db_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=covid_19_dev_user
+      - POSTGRES_PASS=covid_19_pwd
+      - POSTGRES_DB=covid_19_dev
+      - ALLOW_IP_RANGE=0.0.0.0/0
+    ports:
+      - 5434:5432
+
+volumes:
+  postgres_covid19_db_data:

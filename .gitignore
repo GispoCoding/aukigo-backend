@@ -1,3 +1,2 @@
 *.sqlite3
-/.env.prod
-/.env.prod.db
+/.env
