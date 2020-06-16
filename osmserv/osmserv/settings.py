@@ -16,7 +16,6 @@ from dotenv import read_dotenv
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
@@ -35,10 +34,7 @@ if DEBUG and not IN_DOCKER:
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get("SECRET_KEY", default='v8bhs^1wcd)z7k!cf&#)2!pye_wt_4lq@^g-(ax%%z$5n0x&7u')
 
-
-
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", default='*').split(" ")
-
 
 # Application definition
 
@@ -82,7 +78,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'osmserv.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
@@ -96,7 +91,6 @@ DATABASES = {
         "PORT": os.environ.get("SQL_PORT", ""),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -116,7 +110,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -130,12 +123,10 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-
 
 '''
 ###################################
@@ -179,7 +170,7 @@ LOGGING = {
             'level': 'INFO' if DEBUG else 'INFO',
             'propagate': True,
         },
-        'appname': { # TODO: set app name here
+        'appname': {  # TODO: set app name here
             'handlers': ['appfile', 'console'] if DEBUG else ['appfile'],
             'level': 'DEBUG' if DEBUG else os.environ.get("LOGGING_LEVEL", "INFO"),
             'propagate': True,
@@ -192,4 +183,3 @@ CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
-
