@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.gis',
     # Own apps
+    'datahub.apps.DatahubConfig',
 ]
 
 MIDDLEWARE = [
@@ -137,6 +138,9 @@ Application specific configurations
 ###################################
 '''
 
+# Default coordinate reference system id
+SRID = 4326
+
 # Logging
 LOGGING = {
     'version': 1,
@@ -170,12 +174,12 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['djangofile', 'console'] if DEBUG else ['djangofile'],
-            'level': 'INFO' if DEBUG else 'INFO',
+            'level': ('INFO' if DEBUG else 'INFO'),
             'propagate': True,
         },
-        'appname': {  # TODO: set app name here
+        'datahub': {
             'handlers': ['appfile', 'console'] if DEBUG else ['appfile'],
-            'level': 'DEBUG' if DEBUG else os.environ.get("LOGGING_LEVEL", "INFO"),
+            'level': ('DEBUG' if DEBUG else os.environ.get("LOGGING_LEVEL", "INFO")),
             'propagate': True,
         }
     },
@@ -186,3 +190,13 @@ CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+
+DEFAULT_BBOX = '60.260904,24.499405,60.352655,24.668588'
+
+# OSM API
+OVERPASS_API_URL = 'http://overpass-api.de/api/interpreter'
+
+# Directories
+DATA_DIR = os.path.join(os.path.dirname(__file__), '../data')
+TEST_DATA_DIR = os.path.join(DATA_DIR, 'testdata')
+FIXTURE_DIRS = [os.path.join(TEST_DATA_DIR, 'fixtures')]

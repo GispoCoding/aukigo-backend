@@ -1,0 +1,21 @@
+[
+  {
+    "model": "datahub.areaofinterest",
+    "pk": "Test",
+    "fields": {
+      "bbox": "SRID=4326;POLYGON ((24.499 60.26, 24.499 60.352, 24.668 60.352, 24.668 60.26, 24.499 60.26))"
+    }
+  },
+  {
+    "model": "datahub.layer",
+    "pk": 1,
+    "fields": {
+      "name": "camping",
+      "tags": "[\"leisure=firepit\"]",
+      "is_osm_layer": true,
+      "areas": [
+        "Test"
+      ]
+    }
+  }
+]
