@@ -3,9 +3,9 @@ version: '3.7'
 services:
   web:
     build:
-      context: ./osmserv
+      context: aukigo
       dockerfile: Dockerfile.prod
-    command: sh -c "celery -A osmserv worker -B -l info --concurrency=3 & gunicorn osmserv.wsgi:application --bind 0.0.0.0:8000 --timeout 300"
+    command: sh -c "celery -A aukigo worker -B -l info --concurrency=3 & gunicorn aukigo.wsgi:application --bind 0.0.0.0:8000 --timeout 300"
     volumes:
       - static_volume:/home/app/web/static
     expose:

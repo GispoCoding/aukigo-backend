@@ -1,3 +1,4 @@
 *.sqlite3
 /.env
 /sandbox/
+/aukigo/celerybeat-schedule

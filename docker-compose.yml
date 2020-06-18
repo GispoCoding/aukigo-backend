@@ -2,10 +2,10 @@ version: '3.7'
 
 services:
   web:
-    build: ./osmserv
-    command: sh -c "celery -A osmserv worker -B -l debug & python manage.py runserver 0.0.0.0:8000"
+    build: aukigo
+    command: sh -c "celery -A aukigo worker -B -l debug & python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - ./osmserv/:/usr/src/app/
+      - ./aukigo/:/usr/src/app/
     ports:
       - 8001:8000
     env_file:
