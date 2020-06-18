@@ -1,0 +1,50 @@
+version: '3.7'
+
+services:
+  web:
+    build: aukigo
+    command: sh -c "celery -A aukigo worker -B -l debug & python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./aukigo/:/usr/src/app/
+    ports:
+      - 8001:8000
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+    links:
+      - redis
+
+  redis:
+    image: redis:5.0.8-alpine
+    ports:
+      - '6379:6379'
+
+  pg_tileserv:
+    # Conf file in /etc/pg_tileserv.toml, could be mounted if need to modify
+    image: pramsey/pg_tileserv:20200612
+    environment:
+      - DATABASE_URL=postgresql://covid_19_dev_user:covid_19_pwd@db/covid_19_dev
+    depends_on:
+      - db
+    ports:
+      - '7800:7800'
+      # - '7801:7801' #https
+    restart: # does not wait for db and shuts down if the connection is not valid. Other option would be to install netcat and use command: while ! nc -w 1 -z db 5432; do sleep 0.1; done; /app/pg_tileserv
+      unless-stopped
+
+  # Connecting: docker-compose exec db psql -U osm_dev -d osm_dev -h localhost
+  db:
+    image: kartoza/postgis:12.1
+    volumes:
+      - postgres_covid19_db_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=covid_19_dev_user
+      - POSTGRES_PASS=covid_19_pwd
+      - POSTGRES_DB=covid_19_dev
+      - ALLOW_IP_RANGE=0.0.0.0/0
+    ports:
+      - 5434:5432
+
+volumes:
+  postgres_covid19_db_data:
