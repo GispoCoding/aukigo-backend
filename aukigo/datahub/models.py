@@ -66,8 +66,9 @@ class Layer(models.Model):
         with connection.cursor() as cursor:
             cursor.execute(sql, params)
 
-        self._geom_types.append(geom_type.name)
-        self.save()
+        if geom_type not in self.geom_types:
+            self._geom_types.append(geom_type.name)
+            self.save()
 
     def _get_view_name_for_type(self, geom_type: GeomType):
         return f"{settings.PG_VIEW_PREFIX}_{self.name.lower()}_{geom_type.value['postfix']}"

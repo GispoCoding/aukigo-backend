@@ -39,6 +39,7 @@ class ModelsTest(TestCase):
     def test_layer_with_points(self):
         layer = Layer.objects.create(name="test", is_osm_layer=True)
         layer.add_support_for_type(GeomType.POINT)
+        layer.add_support_for_type(GeomType.POINT)
         self.assertEqual(layer.views, ["osm_test_p"])
         layer.delete()
 
