@@ -5,9 +5,9 @@ from django.contrib.gis.geos import Polygon
 
 
 class GeomType(enum.Enum):
-    POINT = {'postfix': 'p'}
-    LINE = {'postfix': 'l'}
-    POLYGON = {'postfix': 'pl'}
+    POINT = {'postfix': 'p', 'osm_layers': ['points']}
+    LINE = {'postfix': 'l', 'osm_layers': ['lines', 'multilinestrings']}
+    POLYGON = {'postfix': 'pl', 'osm_layers': ['multipolygons']}
 
     @property
     def osm_model(self):
@@ -24,7 +24,7 @@ class GeomType(enum.Enum):
         t = feature['geometry']['type']
         if t == 'Point':
             return GeomType.POINT
-        elif t == 'LineString':
+        elif t == 'MultiLineString':
             return GeomType.LINE
         else:
             return GeomType.POLYGON
@@ -50,3 +50,12 @@ def overpass_bbox_to_polygon(bbox: Tuple[float, float, float, float]) -> Polygon
     # GEOS expects coordinates in (xmin, ymin, xmax, ymax)
     geos_bbox = (bbox[1], bbox[0], bbox[3], bbox[2])
     return Polygon.from_bbox(geos_bbox)
+
+
+def osm_tags_to_dict(tag_string: str) -> {str: str}:
+    """
+    Converts ogr osm tag string to tag dictionary
+    :param tag_string:
+    :return: tag dictionary
+    """
+    return dict(tag.replace('"', '').split('=>') for tag in tag_string.split('","'))

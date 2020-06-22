@@ -78,7 +78,7 @@ class OsmPoint(OsmFeature):
 
 
 class OsmLine(OsmFeature):
-    geom = models.LineStringField(srid=settings.SRID)
+    geom = models.MultiLineStringField(srid=settings.SRID)
 
 
 class OsmPolygon(OsmFeature):

@@ -193,10 +193,11 @@ CELERY_TASK_SERIALIZER = 'json'
 
 DEFAULT_BBOX = '60.260904,24.499405,60.352655,24.668588'
 
-# OSM API
-OVERPASS_API_URL = 'http://overpass-api.de/api/interpreter'
-
 # Directories
 DATA_DIR = os.path.join(os.path.dirname(__file__), '../data')
 TEST_DATA_DIR = os.path.join(DATA_DIR, 'testdata')
 FIXTURE_DIRS = [os.path.join(TEST_DATA_DIR, 'fixtures')]
+
+# OSM API
+OVERPASS_API_URL = 'http://overpass-api.de/api/interpreter'
+OSM_CONFIG = os.path.join(DATA_DIR, "osmconf.ini")
