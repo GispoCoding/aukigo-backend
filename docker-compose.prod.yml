@@ -27,7 +27,7 @@ services:
     # Conf file in /etc/pg_tileserv.toml, could be mounted if need to modify
     image: pramsey/pg_tileserv:20200612
     environment:
-      - DATABASE_URL=postgresql://${SQL_USER:-postgres}:${SQL_PASSWORD:-postgres}@db/${SQL_DATABASE:-covid_db}
+      - DATABASE_URL=postgresql://${SQL_USER:-postgres}:${SQL_PASSWORD:-postgres}@db/${SQL_DATABASE:-aukigo_db}
     depends_on:
       - db
     expose:
@@ -43,7 +43,7 @@ services:
     environment:
       - POSTGRES_USER=${SQL_USER:-postgres}
       - POSTGRES_PASS=${SQL_PASSWORD:-postgres}
-      - POSTGRES_DB=${SQL_DATABASE:-covid_db}
+      - POSTGRES_DB=${SQL_DATABASE:-aukigo_db}
     restart: unless-stopped
     healthcheck:
       test: "exit 0"

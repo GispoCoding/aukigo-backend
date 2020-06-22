@@ -1,4 +1,4 @@
-covid19-map-backend
+Aukigo-backend
 ===================
 
 The structure partly inspired by [ngz-geoviz](https://github.com/GispoCoding/ngz-geoviz/tree/master/ngz-geoviz).
