@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+
 from dotenv import read_dotenv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -46,6 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    # Third party
+    'rest_framework',
     # Own apps
     'datahub.apps.DatahubConfig',
 ]
@@ -112,6 +115,25 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+REST_FRAMEWORK = {
+    # TODO: Uncomment following to prevent the use of browsable api
+    #
+    #     'DEFAULT_RENDERER_CLASSES': (
+    #         'rest_framework.renderers.JSONRenderer',
+    #     )
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/minute',
+        'user': '1000/day'
+    }
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
@@ -201,3 +223,9 @@ FIXTURE_DIRS = [os.path.join(TEST_DATA_DIR, 'fixtures')]
 # OSM API
 OVERPASS_API_URL = 'http://overpass-api.de/api/interpreter'
 OSM_CONFIG = os.path.join(DATA_DIR, "osmconf.ini")
+
+# pg_tileserv
+PG_TILESERV_PORT = int(os.environ.get("PG_TILESERV_PORT", "7800"))
+
+# misc
+PG_VIEW_PREFIX = 'osm'

@@ -133,7 +133,8 @@ class OsmLoader:
         new_ids = set()
         for feature in features:
             props = feature['properties']
-            osmid = int(props['osm_id'])
+            # if osm_way_id is present, it represents that the geometry is closed way instead of relation
+            osmid = int(props.get('osm_id', props.get('osm_way_id')))
             geom = GEOSGeometry(str(feature['geometry']), srid=settings.SRID)
             tags = osm_tags_to_dict(props["all_tags"])
             geom_type = GeomType.from_feature(feature)
@@ -152,6 +153,6 @@ class OsmLoader:
 
         # Create views
         for geom_type in included_types:
-            layer.create_view(geom_type)
+            layer.add_support_for_type(geom_type)
 
         return ids, new_ids

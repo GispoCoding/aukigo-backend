@@ -1,6 +1,7 @@
 import logging
 
 from celery import shared_task
+
 from .models import Layer
 from .osm_loader import OsmLoader
 
@@ -13,6 +14,5 @@ def load_osm_data():
     try:
         for layer in Layer.objects.filter(is_osm_layer=True):
             loader.populate(layer)
-    except Exception:
+    except RuntimeError:
         logger.exception("Uncaught error occurred while loading osm data")
-        raise ()

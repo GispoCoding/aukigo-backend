@@ -1,13 +1,13 @@
-import json
 import os
 
 from django.conf import settings
 from django.contrib.gis.geos import Polygon
-from django.test import TestCase
+from django.test import TestCase, override_settings
+from django.urls import reverse
 
 from .models import Layer, AreaOfInterest, OsmPoint, OsmLine, OsmPolygon
 from .osm_loader import OsmLoader
-from .utils import overpass_bbox_to_polygon, polygon_to_overpass_bbox, osm_tags_to_dict
+from .utils import overpass_bbox_to_polygon, polygon_to_overpass_bbox, osm_tags_to_dict, GeomType
 
 TEST_POLYGON = Polygon(((24.499, 60.260), (24.499, 60.352), (24.668, 60.352), (24.668, 60.260), (24.499, 60.260)),
                        srid=settings.SRID)
@@ -31,6 +31,36 @@ class UtilsTests(TestCase):
         tag_string = '"1"=>"1","2"=>"long line with, commas"'
         tags = osm_tags_to_dict(tag_string)
         self.assertEqual(tags, {"1": "1", "2": "long line with, commas"})
+
+
+@override_settings(VIEW_PREFIX='osm', PG_TILESERV_PORT=7800)
+class ModelsTest(TestCase):
+
+    def test_layer_with_points(self):
+        layer = Layer.objects.create(name="test", is_osm_layer=True)
+        layer.add_support_for_type(GeomType.POINT)
+        self.assertEqual(layer.views, ["osm_test_p"])
+        layer.delete()
+
+    def test_layer_with_multiple_types(self):
+        layer = Layer.objects.create(name="test", is_osm_layer=True)
+        layer.add_support_for_type(GeomType.LINE)
+        layer.add_support_for_type(GeomType.POINT)
+        layer.add_support_for_type(GeomType.POLYGON)
+        self.assertEqual(layer.views, ["osm_test_l", "osm_test_p", "osm_test_pl"])
+        layer.delete()
+
+    def test_capabilities_view(self):
+        layer = Layer.objects.create(name="test", is_osm_layer=True)
+        layer.add_support_for_type(GeomType.POINT)
+        Layer.objects.create(name="non_osm", is_osm_layer=False)
+        capabilities = self.client.get(reverse("capabilities")).json()
+        self.assertEqual(capabilities["layers"][0]["urls"],
+                         [{'config': 'http://testserver:7800/public.osm_test_p.json',
+                           'tile': 'http://testserver:7800/public.osm_test_p/{z}/{x}/{y}.pbf?properties=osmid,tags'}])
+        self.assertEqual(capabilities["layers"][1]["urls"],
+                         [{'config': 'http://testserver:7800/public.non_osm.json',
+                           'tile': 'http://testserver:7800/public.non_osm/{z}/{x}/{y}.pbf'}])
 
 
 class OsmLoadingTests(TestCase):
