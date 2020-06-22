@@ -22,10 +22,11 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: Pull and build Docker images
-        run: |
-          docker-compose pull
-          docker-compose build
+      - name: Pull Docker images
+        run: docker-compose build
+
+      - name: Build docker images (test build)
+        run: docker-compose build
 
       - name: Start containers
         run: docker-compose up -d
