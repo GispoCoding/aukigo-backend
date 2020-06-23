@@ -1,0 +1,113 @@
+[
+  {
+    "model": "datahub.areaofinterest",
+    "pk": "Nuuksio",
+    "fields": {
+      "bbox": "SRID=4326;POLYGON ((24.499 60.26, 24.499 60.352, 24.668 60.352, 24.668 60.26, 24.499 60.26))"
+    }
+  },
+  {
+    "model": "datahub.layer",
+    "pk": 1,
+    "fields": {
+      "name": "Lodging",
+      "tags": "[\"tourism~[hm]os?tel\", \"tourism=quest_house\", \"tourism=camp_site\", \"tourism=apartment\"]",
+      "is_osm_layer": true,
+      "_geom_types": "[]",
+      "areas": [
+        "Nuuksio"
+      ]
+    }
+  },
+  {
+    "model": "datahub.layer",
+    "pk": 2,
+    "fields": {
+      "name": "Shops",
+      "tags": "[\"shop=*\", \"amenity=marketplace\"]",
+      "is_osm_layer": true,
+      "_geom_types": "[]",
+      "areas": [
+        "Nuuksio"
+      ]
+    }
+  },
+  {
+    "model": "datahub.layer",
+    "pk": 3,
+    "fields": {
+      "name": "Finance",
+      "tags": "[\"amenity=bank\", \"amenity=post_box\", \"amenity=post_office\", \"amenity=post_depot\", \"amenity=atm\"]",
+      "is_osm_layer": true,
+      "_geom_types": "[]",
+      "areas": [
+        "Nuuksio"
+      ]
+    }
+  },
+  {
+    "model": "datahub.layer",
+    "pk": 6,
+    "fields": {
+      "name": "Health",
+      "tags": "[\"amenity=clinic\", \"amenity=dentist\", \"amenity=doctors\", \"amenity=hospital\", \"amenity=pharmacy\", \"amenity=veterinary\"]",
+      "is_osm_layer": true,
+      "_geom_types": null,
+      "areas": [
+        "Nuuksio"
+      ]
+    }
+  },
+  {
+    "model": "datahub.layer",
+    "pk": 7,
+    "fields": {
+      "name": "Attractions",
+      "tags": "[\"building=church\", \"amenity=place_of_worship\", \"building=mosque\", \"building=synagogue\", \"tourism=attraction\", \"historic=memorial\", \"building=temple\", \"tourism=museum\", \"tourism=viewpoint\", \"historic~castle.*\", \"historic=monument\", \"historic=tomb\", \"historic=wayside_shrine\"]",
+      "is_osm_layer": true,
+      "_geom_types": "[]",
+      "areas": [
+        "Nuuksio"
+      ]
+    }
+  },
+  {
+    "model": "datahub.layer",
+    "pk": 8,
+    "fields": {
+      "name": "Transportation",
+      "tags": "[\"amenity=bus_station\", \"public_transport=station\", \"building=train_station\", \"building=transportation\", \"amenity=taxi\", \"aeroway=aerodrome\", \"amenity~.*parking\", \"amenity~.*rental\", \"railway=subway_entrance\", \"amenity~.*sharing\", \"amenity=fuel\"]",
+      "is_osm_layer": true,
+      "_geom_types": "[]",
+      "areas": [
+        "Nuuksio"
+      ]
+    }
+  },
+  {
+    "model": "datahub.layer",
+    "pk": 9,
+    "fields": {
+      "name": "Food",
+      "tags": "[\"amenity=restaurant\", \"amenity=fast_food\", \"amenity=pub\", \"amenity=bar\", \"amenity=cafe\"]",
+      "is_osm_layer": true,
+      "_geom_types": "[]",
+      "areas": [
+        "Nuuksio"
+      ]
+    }
+  },
+  {
+    "model": "datahub.layer",
+    "pk": 10,
+    "fields": {
+      "name": "Entertainment",
+      "tags": "[\"leisure=park\", \"leisure=sauna\", \"amenity=sauna\", \"amenity=nightclub\", \"amenity=cinema\", \"amenity=theatre\", \"leisure=stadium\", \"building=stadium\", \"amenity=library\", \"amenity=casino\", \"leisure=fitness_centre\", \"leisure=sports_centre\", \"leisure~swimming.*\", \"leisure=water_park\", \"tourism=zoo\", \"man_made=pier\", \"leisure=pitch\", \"sport=soccer\", \"sport=basketball\", \"sport=athletics\"]",
+      "is_osm_layer": true,
+      "_geom_types": "[]",
+      "areas": [
+        "Nuuksio"
+      ]
+    }
+  }
+]
