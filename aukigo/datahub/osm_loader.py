@@ -9,14 +9,16 @@ from django.conf import settings
 from django.contrib.gis.geos import GEOSGeometry
 from osgeo import gdal
 
-from .models import Layer
+from .exeptions import TooManyRequests
+from .models import Layer, AreaOfInterest
 from .utils import GeomType, osm_tags_to_dict, model_tag_to_overpass_tag
 
 logger = logging.getLogger(__name__)
 
 
 class OsmLoader:
-    URL = settings.OVERPASS_API_URL
+    URL = f"{settings.OVERPASS_API_URL}/interpreter"
+    KILL_EXISTING_QUERIES_URL = f"{settings.OVERPASS_API_URL}/kill_my_queries"
     # TODO: should Newer be used and should removed be deleted?
     QUERY_TEMPLATE = '''
 // gather results
@@ -37,48 +39,58 @@ class OsmLoader:
     '''
 
     def __init__(self, timeout: int = 900):
+        """
+
+        :param timeout: Timeout for the query execution
+        """
         self.timeout = timeout
 
-    def populate(self, layer: Layer) -> bool:
+    def populate(self, layer: Layer, area: AreaOfInterest) -> bool:
         """
         Populate models with features found by layer tags
         :param layer: Layer object
-        :return: Whether any featues were populated or not
+        :param area: AreaOfInterest object from layer
+        :return: Whether any features were populated or not
         """
-        ids = new_ids = set()
 
-        for area in layer.areas.all():
-            query_parts = [self.QUERY_PART_TEMPLATE.format(
-                tag=model_tag_to_overpass_tag(tag),
-                bbox=area.overpass_bbox
-            )
-                for tag in layer.tags]
-            if not len(query_parts):
-                logger.debug("No tags available, skipping...")
-                continue
+        query_parts = [self.QUERY_PART_TEMPLATE.format(
+            tag=model_tag_to_overpass_tag(tag),
+            bbox=area.overpass_bbox
+        )
+            for tag in layer.tags]
+        if not len(query_parts):
+            logger.debug("No tags available, skipping...")
+            return False
 
-            query = self.QUERY_TEMPLATE.format(
-                query_parts='\n'.join(query_parts),
-                timeout=self.timeout
-            )
-            logger.debug(query)
-            try:
-                r = requests.get(self.URL, params={'data': query})
-                r.raise_for_status()
-                features = self._overpass_xml_to_geojson_features(r.text)
-            except requests.HTTPError:
-                logger.exception(f"Query failed for following area: '{area}'. Query: {query} \n Skpping...")
-                continue
+        query = self.QUERY_TEMPLATE.format(
+            query_parts='\n'.join(query_parts),
+            timeout=self.timeout
+        )
+        logger.debug(query)
 
-            ids_, new_ids_ = self._save_features(layer, features)
-            ids = ids.union(ids_)
-            new_ids = new_ids.union(new_ids_)
+        r = requests.get(self.URL, params={'data': query})
+        try:
+            if r.status_code == 426:
+                # Too many requests, killing existing with instructions
+                # from http://overpass-api.de/command_line.html and retrying using Celery
+                logger.warning(f"Too many requests foor {layer}:{area}, killing existing and retrying...")
+                requests.get(self.KILL_EXISTING_QUERIES_URL)
+                raise TooManyRequests()
 
-        logger.info(f"Processed {len(ids)} features. {len(new_ids)} new features.")
+            r.raise_for_status()
+            features = self._overpass_xml_to_geojson_features(r.text)
+        except requests.HTTPError:
+            logger.exception(
+                f"Query failed for following area: '{area}'. Query: {query} \n Headers: {r.headers} \n Skpping...")
+            return False
+
+        ids, new_ids = self._save_features(layer, features)
+
+        logger.info(f"Processed layer '{layer}': {len(ids)} features. {len(new_ids)} new features.")
         return len(ids) > 0
 
     @staticmethod
-    def _overpass_xml_to_geojson_features(xml_data) -> []:
+    def _overpass_xml_to_geojson_features(xml_data: str) -> []:
         """
         Converts Overpass xml to geojson features
         :param xml_data: Overpass XML

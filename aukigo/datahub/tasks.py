@@ -1,8 +1,10 @@
 import logging
 
-from celery import shared_task
+from celery import shared_task, group
+from django.conf import settings
 
-from .models import Layer
+from .exeptions import TooManyRequests
+from .models import Layer, AreaOfInterest
 from .osm_loader import OsmLoader
 
 logger = logging.getLogger(__name__)
@@ -10,9 +12,37 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def load_osm_data():
+    """
+    Task to load OSM data into the database for each layer.
+    Spawns number of retryable child tasks
+    :return:
+    """
+    g = group(load_osm_data_for_area.s(layer.pk, area.pk)
+              for layer in Layer.objects.filter(is_osm_layer=True)
+              for area in layer.areas.all())
+
+    if not settings.IN_INTEGRATION_TEST:
+        # Using queue with concurrency of 1 to avoid problems with the Overpass API
+        g.apply_async(queue='network')
+    else:
+        g.apply()
+
+
+@shared_task(rate_limit='10/s', autoretry_for=(TooManyRequests,), retry_backoff=2, retry_backoff_max=60,
+             max_retries=4)
+def load_osm_data_for_area(layer_id, area_id):
+    """
+    Load OSM data for given layer and area
+    :param layer_id: Layer pk
+    :param area_id: AreaOfInterest pk
+    :return: completion status
+    """
     loader = OsmLoader()
+    layer = Layer.objects.get(pk=layer_id)
+    area = AreaOfInterest.objects.get(pk=area_id)
+
     try:
-        for layer in Layer.objects.filter(is_osm_layer=True):
-            loader.populate(layer)
+        succeeded = loader.populate(layer, area)
+        return succeeded
     except RuntimeError:
         logger.exception("Uncaught error occurred while loading osm data")

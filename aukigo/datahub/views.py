@@ -45,7 +45,7 @@ class Capabilities(APIView):
 @login_required
 def start_osm_task(request):
     # Starts celery task
-    load_osm_data.delay()
+    load_osm_data.apply_async(queue='main')
     return JsonResponse({"status": "started!"})
 
 

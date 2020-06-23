@@ -1,6 +1,6 @@
 import logging
 
-from django.test import TestCase, tag
+from django.test import TestCase, tag, override_settings
 
 from .models import OsmPoint
 from .tasks import load_osm_data
@@ -9,6 +9,7 @@ logging.disable(logging.DEBUG)
 
 
 @tag("integration")  # ./manage.py test --exclude-tag=integration & ./manage.py test --tag=integration
+@override_settings(IN_INTEGRATION_TEST=True)
 class DatahubIntegrationTests(TestCase):
     # names: camping, tourism, tourism2
     fixtures = ['camping.json']

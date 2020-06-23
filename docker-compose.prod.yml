@@ -5,7 +5,7 @@ services:
     build:
       context: aukigo
       dockerfile: Dockerfile.prod
-    command: sh -c "celery -A aukigo worker -B -l info --concurrency=3 & gunicorn aukigo.wsgi:application --bind 0.0.0.0:8000 --timeout 300"
+    command: sh -c "celery -A aukigo worker -B -l info -Q main -c 2 & celery -A aukigo worker -l info -Q network -c 1 & gunicorn aukigo.wsgi:application --bind 0.0.0.0:8000 --timeout 300"
     volumes:
       - static_volume:/home/app/web/static
     expose:

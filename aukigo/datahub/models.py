@@ -50,6 +50,9 @@ class Layer(models.Model):
 
     @property
     def geom_types(self) -> [GeomType]:
+        if self._geom_types is None:
+            self._geom_types = []
+            self.save()
         return [GeomType[gtype] for gtype in self._geom_types]
 
     def add_support_for_type(self, geom_type: GeomType, using=DEFAULT_DB_ALIAS) -> None:

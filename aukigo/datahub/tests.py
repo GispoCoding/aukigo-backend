@@ -65,7 +65,7 @@ class ModelsTest(TestCase):
         capabilities = self.client.get(reverse("capabilities")).json()
         self.assertEqual(capabilities["layers"][0]["urls"],
                          [{'config': 'http://testserver:7800/public.osm_test_p.json',
-                           'tile': 'http://testserver:7800/public.osm_test_p/{z}/{x}/{y}.pbf?properties=osmid,tags'}])
+                           'tile': 'http://testserver:7800/public.osm_test_p/{z}/{x}/{y}.pbf?properties=osmid,tags,z_order'}])
         self.assertEqual(capabilities["layers"][1]["urls"],
                          [{'config': 'http://testserver:7800/public.non_osm.json',
                            'tile': 'http://testserver:7800/public.non_osm/{z}/{x}/{y}.pbf'}])
