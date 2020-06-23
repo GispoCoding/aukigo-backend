@@ -36,7 +36,7 @@ class Layer(models.Model):
     areas = models.ManyToManyField(AreaOfInterest, blank=True)
 
     # Use property geom_types for reading
-    _geom_types = ArrayField(models.CharField(max_length=10), blank=True, default=list,
+    _geom_types = ArrayField(models.CharField(max_length=10), blank=True, null=True, default=list,
                              help_text="Leave this field empty. It is populated programmatically.")
 
     def delete(self, using=None, keep_parents=False):
