@@ -30,7 +30,7 @@ class Layer(models.Model):
     """
     name = models.CharField(max_length=200)
     tags = ArrayField(models.CharField(max_length=200), blank=True, null=True,
-                      help_text="Allowed formats: format key=val, key:valuefragment, "
+                      help_text="Allowed formats: key=val, key:valuefragment, "
                                 "key~regex, ~keyregex~regex, key=*, key")
     is_osm_layer = models.BooleanField()
     areas = models.ManyToManyField(AreaOfInterest, blank=True)
