@@ -140,6 +140,9 @@ class OsmLoader:
             geom_type = GeomType.from_feature(feature)
 
             values = {'tags': tags, 'geom': geom}
+            if geom_type == GeomType.LINE:
+                values["z_order"] = props.get("z_order", 0)
+
             obj, created = geom_type.osm_model.objects.update_or_create(pk=osmid, defaults=values)
 
             if created:

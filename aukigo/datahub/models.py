@@ -105,6 +105,7 @@ class OsmPoint(OsmFeature):
 
 class OsmLine(OsmFeature):
     geom = models.MultiLineStringField(srid=settings.SRID)
+    z_order = models.IntegerField(default=0)
 
 
 class OsmPolygon(OsmFeature):

@@ -22,7 +22,7 @@ class Capabilities(APIView):
             config_url = f"{pg_tileserv_url}/public.{name}.json"
             tileurl = f"{pg_tileserv_url}/public.{name}/{vector_props}"
             if is_osm:
-                tileurl += "?properties=osmid,tags"
+                tileurl += "?properties=osmid,tags,z_order"
             return {"config": config_url, "tile": tileurl}
 
         layers = [{

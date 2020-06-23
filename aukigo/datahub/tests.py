@@ -113,7 +113,9 @@ class OsmLoadingTests(TestCase):
         ids, new_ids = self.loader._save_features(self.layer, features)
         self.assertEqual(len(ids), 462)
         self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 67)
-        self.assertEqual(OsmLine.objects.filter(layers=self.layer).count(), 395)
+        lines_qs = OsmLine.objects.filter(layers=self.layer)
+        self.assertEqual(lines_qs.count(), 395)
+        self.assertEqual(lines_qs.filter(z_order__gt=1).count(), 69)
 
     def test_osm_data_processing_with_administrative_boundary(self):
         with open(os.path.join(settings.TEST_DATA_DIR, "administrative_boundary.osm")) as f:
