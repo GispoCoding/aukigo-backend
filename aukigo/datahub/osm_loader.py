@@ -10,7 +10,7 @@ from django.contrib.gis.geos import GEOSGeometry
 from osgeo import gdal
 
 from .models import Layer
-from .utils import GeomType, osm_tags_to_dict
+from .utils import GeomType, osm_tags_to_dict, model_tag_to_overpass_tag
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class OsmLoader:
 
         for area in layer.areas.all():
             query_parts = [self.QUERY_PART_TEMPLATE.format(
-                tag='"{}"="{}"'.format(*tag.split("=")),  # Tag in format "key=val", overpass wants "key"="val"
+                tag=model_tag_to_overpass_tag(tag),
                 bbox=area.overpass_bbox
             )
                 for tag in layer.tags]

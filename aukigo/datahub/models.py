@@ -28,7 +28,9 @@ class Layer(models.Model):
     TODO: https://stackoverflow.com/a/26546181/10068922
     """
     name = models.CharField(max_length=200)
-    tags = ArrayField(models.CharField(max_length=200), blank=True, null=True)
+    tags = ArrayField(models.CharField(max_length=200), blank=True, null=True,
+                      help_text="Allowed formats: format key=val, key:valuefragment, "
+                                "key~regex, ~keyregex~regex, key=*, key")
     is_osm_layer = models.BooleanField()
     areas = models.ManyToManyField(AreaOfInterest, blank=True)
 

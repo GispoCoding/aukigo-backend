@@ -7,7 +7,8 @@ from django.urls import reverse
 
 from .models import Layer, AreaOfInterest, OsmPoint, OsmLine, OsmPolygon
 from .osm_loader import OsmLoader
-from .utils import overpass_bbox_to_polygon, polygon_to_overpass_bbox, osm_tags_to_dict, GeomType
+from .utils import (overpass_bbox_to_polygon, polygon_to_overpass_bbox, osm_tags_to_dict, GeomType,
+                    model_tag_to_overpass_tag)
 
 TEST_POLYGON = Polygon(((24.499, 60.260), (24.499, 60.352), (24.668, 60.352), (24.668, 60.260), (24.499, 60.260)),
                        srid=settings.SRID)
@@ -31,6 +32,12 @@ class UtilsTests(TestCase):
         tag_string = '"1"=>"1","2"=>"long line with, commas"'
         tags = osm_tags_to_dict(tag_string)
         self.assertEqual(tags, {"1": "1", "2": "long line with, commas"})
+
+    def test_model_tags_to_overpass_tags(self):
+        tags = {"key=value", "key:value", "key~val.*", "~key~val", "key=*", "key"}
+        expected = {'"key"="value"', '"key":"value"', '"key"~"val.*"', '"~key"~"val"', '"key"'}
+        overpass_tags = {model_tag_to_overpass_tag(tag) for tag in tags}
+        self.assertEqual(overpass_tags, expected)
 
 
 @override_settings(VIEW_PREFIX='osm', PG_TILESERV_PORT=7800)

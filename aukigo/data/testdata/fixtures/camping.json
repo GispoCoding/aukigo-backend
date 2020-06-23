@@ -17,5 +17,29 @@
         "Test"
       ]
     }
+  },
+  {
+    "model": "datahub.layer",
+    "pk": 2,
+    "fields": {
+      "name": "tourism",
+      "tags": "[\"tourism~[hm]o.?tel\"]",
+      "is_osm_layer": true,
+      "areas": [
+        "Test"
+      ]
+    }
+  },
+  {
+    "model": "datahub.layer",
+    "pk": 3,
+    "fields": {
+      "name": "tourism2",
+      "tags": "[\"tourism~=[hm]o.?tel\", \"tourism=camp_site\"]",
+      "is_osm_layer": true,
+      "areas": [
+        "Test"
+      ]
+    }
   }
 ]

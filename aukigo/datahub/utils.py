@@ -1,7 +1,13 @@
 import enum
+import logging
+import re
 from typing import Tuple
 
 from django.contrib.gis.geos import Polygon
+
+logger = logging.getLogger(__name__)
+
+TAG_SPLIT_PATTERN = re.compile("(?<=[a-z])[=:~]")
 
 
 class GeomType(enum.Enum):
@@ -59,3 +65,26 @@ def osm_tags_to_dict(tag_string: str) -> {str: str}:
     :return: tag dictionary
     """
     return dict(tag.replace('"', '').split('=>') for tag in tag_string.split('","'))
+
+
+def model_tag_to_overpass_tag(tag: str) -> str:
+    """
+    Converts simple tags to overpass query tags
+    :param tag: Tag in format key=val, key:valuefragment, key~regex, ~keyregex~regex, key=*, key
+    :return: tag that can be formatted to overpass query
+    """
+    tag_parts = TAG_SPLIT_PATTERN.split(tag)
+    sep = TAG_SPLIT_PATTERN.findall(tag)
+    sep = sep[0] if len(sep) else None
+
+    guess = f'"{tag}"'
+    if len(tag_parts) == 1:  # case key (hopefully)
+        pass
+    elif len(tag_parts) == 2 and sep is not None:
+        if tag_parts[1] == '*':
+            guess = f'"{tag_parts[0]}"'
+        else:
+            guess = f'"{tag_parts[0]}"{sep}"{tag_parts[1]}"'
+    else:
+        logger.warning(f"Possibly invalid tag: '{tag}'")
+    return guess
