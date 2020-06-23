@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     # Third party
     'rest_framework',
+    'django_better_admin_arrayfield',
     # Own apps
     'datahub.apps.DatahubConfig',
 ]

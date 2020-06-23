@@ -2,8 +2,9 @@ import logging
 
 from django.conf import settings
 from django.contrib.gis.db import models
-from django.contrib.postgres.fields import JSONField, ArrayField
+from django.contrib.postgres.fields import JSONField
 from django.db import DEFAULT_DB_ALIAS, connections
+from django_better_admin_arrayfield.models.fields import ArrayField
 
 from .utils import GeomType, polygon_to_overpass_bbox
 
