@@ -33,7 +33,8 @@ class Layer(models.Model):
     areas = models.ManyToManyField(AreaOfInterest, blank=True)
 
     # Use property geom_types for reading
-    _geom_types = ArrayField(models.CharField(max_length=10), blank=True, default=list)
+    _geom_types = ArrayField(models.CharField(max_length=10), blank=True, default=list,
+                             help_text="Leave this field empty. It is populated programmatically.")
 
     def delete(self, using=None, keep_parents=False):
         if self.is_osm_layer:
@@ -56,17 +57,17 @@ class Layer(models.Model):
         :return:
         """
         # Inspired by https://adamj.eu/tech/2019/04/29/create-table-as-select-in-django/
-        queryset = geom_type.osm_model.objects.filter(layers=self)
-        compiler = queryset.query.get_compiler(using=using)
-        sql, params = compiler.as_sql()
-        connection = connections[DEFAULT_DB_ALIAS]
-        sql = sql.replace('::bytea', '')  # Use geom as is, do not convert it to byte array
-        sql = f'CREATE OR REPLACE VIEW {self._get_view_name_for_type(geom_type)} AS {sql}'
-        logger.debug(sql)
-        with connection.cursor() as cursor:
-            cursor.execute(sql, params)
-
         if geom_type not in self.geom_types:
+            queryset = geom_type.osm_model.objects.filter(layers=self)
+            compiler = queryset.query.get_compiler(using=using)
+            sql, params = compiler.as_sql()
+            connection = connections[DEFAULT_DB_ALIAS]
+            sql = sql.replace('::bytea', '')  # Use geom as is, do not convert it to byte array
+            sql = f'CREATE OR REPLACE VIEW {self._get_view_name_for_type(geom_type)} AS {sql}'
+            logger.debug(sql)
+            with connection.cursor() as cursor:
+                cursor.execute(sql, params)
+
             self._geom_types.append(geom_type.name)
             self.save()
 

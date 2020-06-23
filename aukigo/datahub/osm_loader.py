@@ -147,8 +147,9 @@ class OsmLoader:
                 logger.debug(f"New {geom_type.name} created: {osmid}")
 
             ids.add(osmid)
-            obj.layers.add(layer)
-            obj.save()
+            if layer not in obj.layers.all():
+                obj.layers.add(layer)
+                obj.save()
             included_types.add(geom_type)
 
         # Create views

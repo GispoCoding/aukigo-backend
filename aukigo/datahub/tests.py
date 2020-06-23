@@ -85,6 +85,19 @@ class OsmLoadingTests(TestCase):
         self.assertEqual(len(new_ids), 7)
         self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 7)
 
+    def test_osm_data_processing_with_firepit_points_multiple_times(self):
+        with open(os.path.join(settings.TEST_DATA_DIR, "firepit.osm")) as f:
+            data = f.read()
+
+        features = self.loader._overpass_xml_to_geojson_features(data)
+        self.assertEqual(len(features), 7)
+        self.loader._save_features(self.layer, features)
+        ids, new_ids = self.loader._save_features(self.layer, features)
+        self.assertEqual(len(ids), 7)
+        self.assertEqual(len(new_ids), 0)
+        self.assertEqual(OsmPoint.objects.first().layers.count(), 1)
+        self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 7)
+
     def test_osm_data_processing_with_hiking_routes(self):
         with open(os.path.join(settings.TEST_DATA_DIR, "hiking_routes.osm")) as f:
             data = f.read()
