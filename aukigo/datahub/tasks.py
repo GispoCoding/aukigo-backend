@@ -44,5 +44,6 @@ def load_osm_data_for_area(layer_id, area_id):
     try:
         succeeded = loader.populate(layer, area)
         return succeeded
-    except RuntimeError:
+    except Exception:
         logger.exception("Uncaught error occurred while loading osm data")
+        raise
