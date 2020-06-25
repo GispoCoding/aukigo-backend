@@ -1,5 +1,6 @@
 Aukigo-backend
 ===================
+![](https://github.com/GispoCoding/aukigo-backend/workflows/Tests/badge.svg)
 
 The structure partly inspired by [ngz-geoviz](https://github.com/GispoCoding/ngz-geoviz/tree/master/ngz-geoviz).
 
