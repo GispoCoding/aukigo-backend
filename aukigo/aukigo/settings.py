@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+
 from dotenv import read_dotenv
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -46,7 +47,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    # Third party
+    'rest_framework',
+    'django_better_admin_arrayfield',
     # Own apps
+    'datahub.apps.DatahubConfig',
 ]
 
 MIDDLEWARE = [
@@ -112,6 +117,25 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    # TODO: Uncomment following to prevent the use of browsable api
+    #
+    #     'DEFAULT_RENDERER_CLASSES': (
+    #         'rest_framework.renderers.JSONRenderer',
+    #     )
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '10/minute',
+        'user': '1000/day'
+    }
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -136,6 +160,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 Application specific configurations
 ###################################
 '''
+
+# Default coordinate reference system id
+SRID = 4326
 
 # Logging
 LOGGING = {
@@ -170,12 +197,12 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['djangofile', 'console'] if DEBUG else ['djangofile'],
-            'level': 'INFO' if DEBUG else 'INFO',
+            'level': ('INFO' if DEBUG else 'INFO'),
             'propagate': True,
         },
-        'appname': {  # TODO: set app name here
+        'datahub': {
             'handlers': ['appfile', 'console'] if DEBUG else ['appfile'],
-            'level': 'DEBUG' if DEBUG else os.environ.get("LOGGING_LEVEL", "INFO"),
+            'level': ('DEBUG' if DEBUG else os.environ.get("LOGGING_LEVEL", "INFO")),
             'propagate': True,
         }
     },
@@ -186,3 +213,24 @@ CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+
+DEFAULT_BBOX = '60.260904,24.499405,60.352655,24.668588'
+
+# Directories
+DATA_DIR = os.path.join(os.path.dirname(__file__), '../data')
+TEST_DATA_DIR = os.path.join(DATA_DIR, 'testdata')
+FIXTURE_DIRS = [
+    os.path.join(DATA_DIR, 'fixtures'),
+    os.path.join(TEST_DATA_DIR, 'fixtures')
+]
+
+# OSM API
+OVERPASS_API_URL = 'http://overpass-api.de/api'
+OSM_CONFIG = os.path.join(DATA_DIR, "osmconf.ini")
+
+# pg_tileserv
+PG_TILESERV_PORT = int(os.environ.get("PG_TILESERV_PORT", "7800"))
+
+# misc
+PG_VIEW_PREFIX = 'osm'
+IN_INTEGRATION_TEST = False

@@ -2,3 +2,4 @@
 /.env
 /sandbox/
 /aukigo/celerybeat-schedule
+/aukigo/sandbox.py

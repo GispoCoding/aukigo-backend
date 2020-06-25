@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<osm version="0.6" generator="Overpass API 0.7.56.1004 6cd3eaec">
+    <note>The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.
+    </note>
+    <meta osm_base="2020-06-22T07:43:03Z"/>
+
+    <node id="888747755" lat="60.3498801" lon="24.6006042">
+        <tag k="amenity" v="shelter"/>
+        <tag k="leisure" v="firepit"/>
+        <tag k="name" v="Kämmenlammen laavu"/>
+        <tag k="shelter_type" v="lean_to"/>
+        <tag k="source"
+             v="survey;https://www.vihti.fi/kulttuuri-ja-vapaa-aika/liikunta/retkeily-ja-ulkoilu/laavut-kodat-ja-nuotiopaikat/"/>
+        <tag k="tourism" v="picnic_site"/>
+    </node>
+    <node id="2919437626" lat="60.2697246" lon="24.6348672">
+        <tag k="leisure" v="firepit"/>
+    </node>
+    <node id="4623471079" lat="60.2934413" lon="24.5560095">
+        <tag k="leisure" v="firepit"/>
+    </node>
+    <node id="4623471080" lat="60.2937497" lon="24.5552907">
+        <tag k="leisure" v="firepit"/>
+    </node>
+    <node id="7505611518" lat="60.3233156" lon="24.6639172">
+        <tag k="leisure" v="firepit"/>
+    </node>
+    <node id="7505611519" lat="60.3197603" lon="24.6637050">
+        <tag k="leisure" v="firepit"/>
+    </node>
+    <node id="7505611520" lat="60.3174355" lon="24.6629972">
+        <tag k="leisure" v="firepit"/>
+    </node>
+
+</osm>

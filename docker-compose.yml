@@ -3,7 +3,7 @@ version: '3.7'
 services:
   web:
     build: aukigo
-    command: sh -c "celery -A aukigo worker -B -l debug & python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "celery -A aukigo worker -B -l debug -Q main -c 2 & celery -A aukigo worker -l debug -Q network -c 1 & python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./aukigo/:/usr/src/app/
     ports:
