@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     # Third party
     'rest_framework',
+    'rest_framework_gis',
     'django_better_admin_arrayfield',
     # Own apps
     'datahub.apps.DatahubConfig',
@@ -120,12 +121,12 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     # TODO: Uncomment following to prevent the use of browsable api
     #
-    #     'DEFAULT_RENDERER_CLASSES': (
-    #         'rest_framework.renderers.JSONRenderer',
-    #     )
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
+    # 'DEFAULT_RENDERER_CLASSES': (
+    #     'rest_framework.renderers.JSONRenderer',
+    # ),
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework.authentication.TokenAuthentication',
+    # ],
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'
@@ -133,7 +134,10 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '10/minute' if not DEBUG else '60/minute',
         'user': '1000/day' if not DEBUG else '60/minute'
-    }
+    },
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
 }
 
 # Internationalization

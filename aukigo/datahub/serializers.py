@@ -1,7 +1,19 @@
 from django.conf import settings
 from rest_framework import serializers
 
-from .models import Tileset
+from .models import Tileset, AreaOfInterest, OsmLayer
+
+
+class OsmLayerSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = OsmLayer
+        exclude = ('_geom_types',)
+
+
+class AreaOfInterestSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = AreaOfInterest
+        fields = ('url', 'name', 'bbox')
 
 
 class TilesetSerializer(serializers.HyperlinkedModelSerializer):

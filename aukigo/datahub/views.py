@@ -2,8 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from rest_framework import viewsets
 
-from .models import Tileset
-from .serializers import TilesetSerializer
+from .models import Tileset, AreaOfInterest
+from .serializers import TilesetSerializer, AreaOfInterestSerializer, OsmLayer, OsmLayerSerializer
 from .tasks import load_osm_data
 
 
@@ -11,6 +11,16 @@ from .tasks import load_osm_data
 class TilesetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tileset.objects.all()
     serializer_class = TilesetSerializer
+
+
+class AreaViewSet(viewsets.ModelViewSet):
+    queryset = AreaOfInterest.objects.all()
+    serializer_class = AreaOfInterestSerializer
+
+
+class OsmLayerViewSet(viewsets.ModelViewSet):
+    queryset = OsmLayer.objects.all()
+    serializer_class = OsmLayerSerializer
 
 
 @login_required
