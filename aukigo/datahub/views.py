@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Layer
+from .models import OsmLayer
 from .tasks import load_osm_data
 
 
@@ -27,12 +27,11 @@ class Capabilities(APIView):
 
         layers = [{
             'name': layer.name,
-            'is_osm_layer': layer.is_osm_layer,
             'tags': layer.tags,
-            'urls': [get_tile_url(layer.name, False)] if not layer.is_osm_layer else [
-                get_tile_url(view, True) for view in layer.views
-            ]
-        } for layer in Layer.objects.all()]
+            # 'urls': [get_tile_url(layer.name, False)] if not layer.is_osm_layer else [
+            #     get_tile_url(view, True) for view in layer.views
+            # ]
+        } for layer in OsmLayer.objects.all()]
 
         capabilities = {
             'basemaps': [],

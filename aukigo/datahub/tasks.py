@@ -4,7 +4,7 @@ from celery import shared_task, group
 from django.conf import settings
 
 from .exeptions import TooManyRequests
-from .models import Layer, AreaOfInterest
+from .models import OsmLayer, AreaOfInterest
 from .osm_loader import OsmLoader
 
 logger = logging.getLogger(__name__)
@@ -18,7 +18,7 @@ def load_osm_data():
     :return:
     """
     g = group(load_osm_data_for_area.s(layer.pk, area.pk)
-              for layer in Layer.objects.filter(is_osm_layer=True)
+              for layer in OsmLayer.objects.all()
               for area in layer.areas.all())
 
     if not settings.IN_INTEGRATION_TEST:
@@ -33,12 +33,12 @@ def load_osm_data():
 def load_osm_data_for_area(layer_id, area_id):
     """
     Load OSM data for given layer and area
-    :param layer_id: Layer pk
+    :param layer_id: OsmLayer pk
     :param area_id: AreaOfInterest pk
     :return: completion status
     """
     loader = OsmLoader()
-    layer = Layer.objects.get(pk=layer_id)
+    layer = OsmLayer.objects.get(pk=layer_id)
     area = AreaOfInterest.objects.get(pk=area_id)
 
     try:

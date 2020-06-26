@@ -10,7 +10,7 @@ from django.contrib.gis.geos import GEOSGeometry
 from osgeo import gdal
 
 from .exeptions import TooManyRequests
-from .models import Layer, AreaOfInterest
+from .models import OsmLayer, AreaOfInterest
 from .utils import GeomType, osm_tags_to_dict, model_tag_to_overpass_tag
 
 logger = logging.getLogger(__name__)
@@ -45,10 +45,10 @@ class OsmLoader:
         """
         self.timeout = timeout
 
-    def populate(self, layer: Layer, area: AreaOfInterest) -> bool:
+    def populate(self, layer: OsmLayer, area: AreaOfInterest) -> bool:
         """
         Populate models with features found by layer tags
-        :param layer: Layer object
+        :param layer: OsmLayer object
         :param area: AreaOfInterest object from layer
         :return: Whether any features were populated or not
         """
@@ -133,10 +133,10 @@ class OsmLoader:
         return features
 
     @staticmethod
-    def _save_features(layer: Layer, features: []) -> Tuple[Set, Set]:
+    def _save_features(layer: OsmLayer, features: []) -> Tuple[Set, Set]:
         """
         Save Geojson features as model objects
-        :param layer: Layer object
+        :param layer: OsmLayer object
         :param features: in Geojson format
         :return: all ids and new ids as sets
         """

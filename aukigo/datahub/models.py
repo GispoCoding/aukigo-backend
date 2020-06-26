@@ -23,16 +23,14 @@ class AreaOfInterest(models.Model):
         return self.name
 
 
-class Layer(models.Model):
+class OsmLayer(models.Model):
     """
     Base layer that will be shown to the client
     TODO: https://stackoverflow.com/a/26546181/10068922
     """
     name = models.CharField(max_length=200)
     tags = ArrayField(models.CharField(max_length=200), blank=True, null=True,
-                      help_text="Allowed formats: key=val, key:valuefragment, "
-                                "key~regex, ~keyregex~regex, key=*, key")
-    is_osm_layer = models.BooleanField()
+                      help_text="Allowed formats: key=val, key~regex, ~keyregex~regex, key=*, key")
     areas = models.ManyToManyField(AreaOfInterest, blank=True)
 
     # Use property geom_types for reading
@@ -40,8 +38,7 @@ class Layer(models.Model):
                              help_text="Leave this field empty. It is populated programmatically.")
 
     def delete(self, using=None, keep_parents=False):
-        if self.is_osm_layer:
-            self._drop_view()
+        self._drop_view()
         return super().delete(using, keep_parents)
 
     @property
@@ -95,7 +92,7 @@ class Layer(models.Model):
 
 class OsmFeature(models.Model):
     osmid = models.BigIntegerField(primary_key=True)
-    layers = models.ManyToManyField(Layer, blank=True)
+    layers = models.ManyToManyField(OsmLayer, blank=True)
     tags = JSONField()
 
     class Meta:
