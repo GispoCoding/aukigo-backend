@@ -4,7 +4,7 @@ from unittest.mock import patch
 from django.test import TestCase, tag, override_settings
 
 from .exeptions import TooManyRequests
-from .models import OsmPoint
+from .models import OsmPoint, Tileset
 from .tasks import load_osm_data
 
 logging.disable(logging.DEBUG)
@@ -26,6 +26,8 @@ class DatahubIntegrationTests(TestCase):
         self.assertGreater(OsmPoint.objects.filter(layers__name='camping').count(), 2)
         self.assertGreater(OsmPoint.objects.filter(layers__name='tourism').count(), 0)  # contains regex tag
         self.assertGreater(OsmPoint.objects.filter(layers__name='tourism2').count(), 6)  # contains two tags
+
+        self.assertGreater(Tileset.objects.count(), 3)  # At least one geom type for each
 
     @patch("datahub.osm_loader.OsmLoader.populate", side_effect=mocked_exception)
     def test_load_osm_retries_when_error_occurs(self, mocked_loader):

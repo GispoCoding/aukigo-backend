@@ -1,5 +1,4 @@
 import os
-from unittest import skip
 
 from django.conf import settings
 from django.contrib.gis.geos import Polygon
@@ -44,37 +43,43 @@ class UtilsTests(TestCase):
 @override_settings(VIEW_PREFIX='osm', PG_TILESERV_PORT=7800)
 class ModelsTest(TestCase):
 
-    def test_layer_with_points(self):
+    def test_osmlayer_with_points(self):
         layer = OsmLayer.objects.create(name="test")
         layer.add_support_for_type(GeomType.POINT)
         layer.add_support_for_type(GeomType.POINT)
         self.assertEqual(layer.views, ["osm_test_p"])
+        self.assertEqual(layer.tilesets.count(), 1)
         layer.delete()
 
-    def test_layer_with_multiple_types(self):
+    def test_osmlayer_with_multiple_types(self):
         layer = OsmLayer.objects.create(name="test")
         layer.add_support_for_type(GeomType.LINE)
         layer.add_support_for_type(GeomType.POINT)
         layer.add_support_for_type(GeomType.POLYGON)
         self.assertEqual(layer.views, ["osm_test_l", "osm_test_p", "osm_test_pl"])
+        self.assertEqual(layer.tilesets.count(), 3)
         layer.delete()
 
-    @skip
-    def test_capabilities_view(self):
+    def test_api_serialization(self):
         layer = OsmLayer.objects.create(name="test")
         layer.add_support_for_type(GeomType.POINT)
-        OsmLayer.objects.create(name="non_osm")
-        capabilities = self.client.get(reverse("capabilities")).json()
-        self.assertEqual(capabilities["layers"][0]["urls"],
-                         [{'config': 'http://testserver:7800/public.osm_test_p.json',
-                           'tile': 'http://testserver:7800/public.osm_test_p/{z}/{x}/{y}.pbf?properties=osmid,tags,z_order'}])
-        self.assertEqual(capabilities["layers"][1]["urls"],
-                         [{'config': 'http://testserver:7800/public.non_osm.json',
-                           'tile': 'http://testserver:7800/public.non_osm/{z}/{x}/{y}.pbf'}])
+        tileset = layer.tilesets.first()
+        response = self.client.get(reverse("api-root") + f"tilesets/{tileset.pk}/").json()
+        self.assertEqual(response,
+                         {'url': f'http://testserver/api/tilesets/{tileset.pk}/', 'tilejson': '2.2.0', 'name': 'test',
+                          'description': None, 'version': '1.0.0',
+                          'attribution': "<a href='http://openstreetmap.org'>OSM contributors</a>",
+                          'template': None,
+                          'legend': None, 'scheme': 'xyz',
+                          'tiles': ['http://testserver:7800/public.osm_test_p/{z}/{x}/{y}.pbf'], 'grids': [],
+                          'data': [], 'minzoom': 1, 'maxzoom': 30, 'bounds': None,
+                          'center': None}
+                         )
 
 
 class OsmLoadingTests(TestCase):
     def setUp(self) -> None:
+        self.maxDiff = None
         self.polygon = TEST_POLYGON
         self.bbox = TEST_BBOX
         area = AreaOfInterest.objects.create(name="Test", bbox=self.polygon)
@@ -93,6 +98,20 @@ class OsmLoadingTests(TestCase):
         self.assertEqual(len(ids), 7)
         self.assertEqual(len(new_ids), 7)
         self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 7)
+
+        tileset = self.layer.tilesets.first()
+        response = self.client.get(reverse("api-root") + f"tilesets/{tileset.pk}/").json()
+        expected = {'url': f'http://testserver/api/tilesets/{tileset.pk}/', 'tilejson': '2.2.0', 'name': 'Camping',
+                    'description': None, 'version': '1.0.0',
+                    'attribution': "<a href='http://openstreetmap.org'>OSM contributors</a>",
+                    'template': None,
+                    'legend': None, 'scheme': 'xyz',
+                    'tiles': ['http://testserver:7800/public.osm_camping_p/{z}/{x}/{y}.pbf'],
+                    'grids': [],
+                    'data': [], 'minzoom': 1, 'maxzoom': 30,
+                    'bounds': [24.5552907, 60.2697246, 24.6639172, 60.3498801],
+                    'center': [24.60960395, 60.309802350000005, 8]}
+        self.assertEqual(response, expected)
 
     def test_osm_data_processing_with_firepit_points_multiple_times(self):
         with open(os.path.join(settings.TEST_DATA_DIR, "firepit.osm")) as f:

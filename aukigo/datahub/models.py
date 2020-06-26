@@ -1,14 +1,63 @@
 import logging
+from typing import Tuple
 
 from django.conf import settings
 from django.contrib.gis.db import models
+from django.contrib.gis.db.models import Extent
+from django.contrib.gis.geos import Polygon
 from django.contrib.postgres.fields import JSONField
 from django.db import DEFAULT_DB_ALIAS, connections
 from django_better_admin_arrayfield.models.fields import ArrayField
 
-from .utils import GeomType, polygon_to_overpass_bbox
+from .utils import (GeomType, polygon_to_overpass_bbox)
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_BOUNDS = (-180.0, -90.0, 180.0, 90.0)
+
+
+class Layer(models.Model):
+    # TileJSON spec fields
+    name = models.CharField(max_length=200, unique=True)
+    description = models.TextField(max_length=1000, blank=True, null=True, help_text="OPTIONAL")
+    version = models.CharField(max_length=10, default="1.0.0", blank=True,
+                               help_text="OPTIONAL. A semver.org style version number. When changes across tiles are "
+                                         "introduced, the minor version MUST change.")
+    attribution = models.CharField(max_length=200, blank=True, null=True,
+                                   help_text="OPTIONAL. Contains an attribution to be displayed when the map is shown to "
+                                             "a user. Implementations MAY decide to treat this as HTML or literal text")
+    template = models.TextField(max_length=1000, blank=True, null=True,
+                                help_text="OPTIONAL. Contains a mustache template to be used to format data from grids "
+                                          "for interaction. See https://github.com/mapbox/utfgrid-spec/tree/master/1.2 "
+                                          "for the interactivity specification.")
+    legend = models.CharField(max_length=200, blank=True, null=True,
+                              help_text="OPTIONAL. Contains a legend to be displayed with the map. Implementations MAY "
+                                        "decide to treat this as HTML or literal text.")
+    minzoom = models.IntegerField(default=1, blank=True, help_text=">= 0, <= 30.")
+    maxzoom = models.IntegerField(default=30, blank=True, help_text=">= 0, <= 30.")
+
+    # Internal fields
+    default_zoom = models.IntegerField(default=8, blank=True, help_text=">= 0, <= 30.")
+
+    def get_bounds(self, geom_type: GeomType) -> Tuple[float, float, float, float]:
+        bounds = DEFAULT_BOUNDS
+        osm_layer: OsmLayer = self.osm_layer
+        if osm_layer:
+            bounds = osm_layer.get_bounds(geom_type)
+        return bounds
+
+    def get_center(self, geom_type: GeomType) -> Tuple[float, float, int]:
+        bounds = self.get_bounds(geom_type)
+        if bounds is not None:
+            centroid = Polygon.from_bbox(bounds).centroid
+            return (centroid.x, centroid.y, self.default_zoom)
+
+    @property
+    def osm_layer(self):
+        return OsmLayer.objects.filter(name=self.name).first()
+
+    def __str__(self):
+        return self.name
 
 
 class AreaOfInterest(models.Model):
@@ -23,12 +72,11 @@ class AreaOfInterest(models.Model):
         return self.name
 
 
-class OsmLayer(models.Model):
+class OsmLayer(Layer):
     """
     Base layer that will be shown to the client
     TODO: https://stackoverflow.com/a/26546181/10068922
     """
-    name = models.CharField(max_length=200)
     tags = ArrayField(models.CharField(max_length=200), blank=True, null=True,
                       help_text="Allowed formats: key=val, key~regex, ~keyregex~regex, key=*, key")
     areas = models.ManyToManyField(AreaOfInterest, blank=True)
@@ -40,6 +88,9 @@ class OsmLayer(models.Model):
     def delete(self, using=None, keep_parents=False):
         self._drop_view()
         return super().delete(using, keep_parents)
+
+    def get_bounds(self, geom_type: GeomType):
+        return geom_type.osm_model.objects.filter(layers=self.pk).aggregate(Extent('geom'))['geom__extent']
 
     @property
     def views(self) -> [str]:
@@ -66,13 +117,19 @@ class OsmLayer(models.Model):
             sql, params = compiler.as_sql()
             connection = connections[DEFAULT_DB_ALIAS]
             sql = sql.replace('::bytea', '')  # Use geom as is, do not convert it to byte array
-            sql = f'CREATE OR REPLACE VIEW {self._get_view_name_for_type(geom_type)} AS {sql}'
+            view_name = self._get_view_name_for_type(geom_type)
+            sql = f'CREATE OR REPLACE VIEW {view_name} AS {sql}'
             logger.debug(sql)
             with connection.cursor() as cursor:
                 cursor.execute(sql, params)
 
+            if self.attribution is None or "osm" not in self.attribution or "open" not in self.attribution.lower():
+                self.attribution = "<a href='http://openstreetmap.org'>OSM contributors</a>"
+
             self._geom_types.append(geom_type.name)
             self.save()
+
+            Tileset.objects.create(layer=self, table=view_name, geom_type=geom_type.name)
 
     def _get_view_name_for_type(self, geom_type: GeomType):
         return f"{settings.PG_VIEW_PREFIX}_{self.name.lower()}_{geom_type.value['postfix']}"
@@ -88,6 +145,30 @@ class OsmLayer(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Tileset(models.Model):
+    """
+    Serialized as Json following the TileJSON 2.2.0 Spec
+    """
+
+    # TileJSON spec static fields
+    tilejson = "2.2.0"  # Describes the version of the TileJSON spec that is implemented by this JSON object
+    scheme = "xyz"
+    grids = []
+    data = []
+
+    # Internal fields
+    layer = models.ForeignKey(Layer, related_name='tilesets', on_delete=models.CASCADE)
+    table = models.CharField(max_length=50)
+    geom_type = models.CharField(max_length=10)
+
+    @property
+    def g_type(self):
+        return GeomType[self.geom_type]
+
+    def __str__(self):
+        return f"{self.layer} ({self.geom_type}): {self.table}"
 
 
 class OsmFeature(models.Model):

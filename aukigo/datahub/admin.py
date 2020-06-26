@@ -1,7 +1,7 @@
 from django.contrib.gis import admin
 from django_better_admin_arrayfield.admin.mixins import DynamicArrayMixin
 
-from .models import OsmLayer, AreaOfInterest
+from .models import OsmLayer, AreaOfInterest, Tileset
 
 
 class OsmAdmin(admin.GeoModelAdmin):
@@ -17,3 +17,4 @@ class ArrayAdmin(admin.ModelAdmin, DynamicArrayMixin):
 # Register your models here.
 admin.site.register(AreaOfInterest, OsmAdmin)
 admin.site.register(OsmLayer, ArrayAdmin)
+admin.site.register(Tileset)
