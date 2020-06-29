@@ -220,4 +220,30 @@ class OsmLine(OsmFeature):
 class OsmPolygon(OsmFeature):
     geom = models.MultiPolygonField(srid=settings.SRID)
 
+
+class Basemap(models.Model):
+    name = models.CharField(max_length=50)
+    attribution = models.CharField(max_length=200, blank=True, null=True,
+                                   help_text="OPTIONAL. Contains an attribution to be displayed when the map is shown to "
+                                             "a user. Implementations MAY decide to treat this as HTML or literal text")
+
+    @property
+    def url(self):
+        """This should be implemeted either as field or as property"""
+        return None
+
+    class Meta:
+        abstract = True
+
+
+class WMTSBasemap(Basemap):
+    url = models.URLField(max_length=500, help_text="Capabilities xml url")
+    layer = models.CharField(max_length=100)
+    tile_matrix_set = models.CharField(max_length=100)
+
+
+class VectorTileBasemap(Basemap):
+    url = models.URLField(max_length=1000, help_text="Vector tile url")
+    api_key = models.CharField(max_length=200)
+
 # Add other models here

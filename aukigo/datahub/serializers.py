@@ -1,7 +1,7 @@
 from django.conf import settings
 from rest_framework import serializers
 
-from .models import Tileset, AreaOfInterest, OsmLayer
+from .models import Tileset, AreaOfInterest, OsmLayer, WMTSBasemap, VectorTileBasemap
 
 
 class OsmLayerSerializer(serializers.HyperlinkedModelSerializer):
@@ -53,3 +53,21 @@ class TilesetSerializer(serializers.HyperlinkedModelSerializer):
             'url', 'tilejson', 'name', 'description', 'version', 'attribution', 'template', 'legend', 'scheme',
             'tiles', 'grids', 'data', 'minzoom', 'maxzoom', 'bounds', 'center'
         )
+
+
+class BasemapSerializer(serializers.ModelSerializer):
+    class Meta:
+        fields = ('name', 'attribution', 'url')
+        abstract = True
+
+
+class WTMSBasemapSerializer(BasemapSerializer):
+    class Meta:
+        fields = BasemapSerializer.Meta.fields + ('layer', 'tile_matrix_set')
+        model = WMTSBasemap
+
+
+class VectorTileBasemapSerializer(BasemapSerializer):
+    class Meta:
+        fields = BasemapSerializer.Meta.fields + ('api_key',)
+        model = VectorTileBasemap
