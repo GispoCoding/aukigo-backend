@@ -1,6 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
-from rest_framework import viewsets
+from rest_framework import viewsets, permissions
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from .models import Tileset, AreaOfInterest, WMTSBasemap, VectorTileBasemap
 from .serializers import (TilesetSerializer, AreaOfInterestSerializer, OsmLayer, OsmLayerSerializer,
@@ -32,6 +34,24 @@ class WMTSBasemapViewSet(viewsets.ModelViewSet):
 class VectorTileBasemapViewSet(viewsets.ModelViewSet):
     queryset = VectorTileBasemap.objects.all()
     serializer_class = VectorTileBasemapSerializer
+
+
+class Capabilities(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        def serialize_all(view_set: viewsets.ModelViewSet) -> list:
+            return view_set.as_view({'get': 'list'})(request._request).data
+
+        data = {
+            'basemaps': {
+                'WMTS': serialize_all(WMTSBasemapViewSet),
+                'vectorTile': serialize_all(VectorTileBasemapViewSet)
+            },
+            'tilesets': serialize_all(TilesetViewSet)
+        }
+
+        return Response(data)
 
 
 @login_required

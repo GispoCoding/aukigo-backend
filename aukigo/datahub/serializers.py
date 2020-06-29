@@ -29,6 +29,7 @@ class TilesetSerializer(serializers.HyperlinkedModelSerializer):
     tiles = serializers.SerializerMethodField()
     bounds = serializers.SerializerMethodField()
     center = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
 
     def get_tiles(self, instance):
         request = self.context['request']
@@ -47,11 +48,14 @@ class TilesetSerializer(serializers.HyperlinkedModelSerializer):
     def get_center(self, instance):
         return instance.layer.get_center(instance.g_type)
 
+    def get_tags(self, instance):
+        return instance.layer.get_tags()
+
     class Meta:
         model = Tileset
         fields = (
             'url', 'tilejson', 'name', 'description', 'version', 'attribution', 'template', 'legend', 'scheme',
-            'tiles', 'grids', 'data', 'minzoom', 'maxzoom', 'bounds', 'center'
+            'tiles', 'grids', 'tags', 'data', 'minzoom', 'maxzoom', 'bounds', 'center'
         )
 
 

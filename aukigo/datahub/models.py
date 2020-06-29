@@ -52,6 +52,12 @@ class Layer(models.Model):
             centroid = Polygon.from_bbox(bounds).centroid
             return (centroid.x, centroid.y, self.default_zoom)
 
+    def get_tags(self):
+        osm_layer: OsmLayer = self.osm_layer
+        if osm_layer:
+            return osm_layer.tags
+        return []
+
     @property
     def osm_layer(self):
         return OsmLayer.objects.filter(name=self.name).first()
@@ -93,7 +99,7 @@ class OsmLayer(Layer):
         return geom_type.osm_model.objects.filter(layers=self.pk).aggregate(Extent('geom'))['geom__extent']
 
     def get_related(self, area: AreaOfInterest) -> {GeomType: set}:
-        bbox = area.bbox
+        bbox: Polygon = area.bbox.envelope
         return {
             GeomType.POINT: set(self.osmpoint_set.filter(geom__intersects=bbox).values_list('pk', flat=True)),
             GeomType.LINE: set(self.osmline_set.filter(geom__intersects=bbox).values_list('pk', flat=True)),
@@ -229,7 +235,7 @@ class Basemap(models.Model):
 
     @property
     def url(self):
-        """This should be implemeted either as field or as property"""
+        """This should be implemented either as field or as property"""
         return None
 
     class Meta:

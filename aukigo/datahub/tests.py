@@ -131,6 +131,7 @@ class OsmLoadingTests(TestCase):
                     'legend': None, 'scheme': 'xyz',
                     'tiles': ['http://testserver:7800/public.osm_camping_p/{z}/{x}/{y}.pbf'],
                     'grids': [],
+                    'tags': ['leisure=firepit'],
                     'data': [], 'minzoom': 1, 'maxzoom': 30,
                     'bounds': [24.5552907, 60.2697246, 24.6639172, 60.3498801],
                     'center': [24.60960395, 60.309802350000005, 8]}
