@@ -233,13 +233,11 @@ class Basemap(models.Model):
                                    help_text="OPTIONAL. Contains an attribution to be displayed when the map is shown to "
                                              "a user. Implementations MAY decide to treat this as HTML or literal text")
 
-    @property
-    def url(self):
-        """This should be implemented either as field or as property"""
-        return None
-
     class Meta:
         abstract = True
+
+    def __str__(self):
+        return self.name
 
 
 class WMTSBasemap(Basemap):
