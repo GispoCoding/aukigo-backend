@@ -54,9 +54,10 @@ class Layer(models.Model):
 
     def get_tags(self):
         osm_layer: OsmLayer = self.osm_layer
+        tags = None
         if osm_layer:
-            return osm_layer.tags
-        return []
+            tags = osm_layer.tags
+        return tags if tags is not None else []
 
     @property
     def osm_layer(self):

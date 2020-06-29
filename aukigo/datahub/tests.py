@@ -70,6 +70,7 @@ class ModelsTest(TestCase):
                           'description': None, 'version': '1.0.0',
                           'attribution': "<a href='http://openstreetmap.org'>OSM contributors</a>",
                           'template': None,
+                          'tags': [],
                           'legend': None, 'scheme': 'xyz',
                           'tiles': ['http://testserver:7800/public.osm_test_p/{z}/{x}/{y}.pbf'], 'grids': [],
                           'data': [], 'minzoom': 1, 'maxzoom': 30, 'bounds': None,
