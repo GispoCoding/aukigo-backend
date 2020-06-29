@@ -217,6 +217,13 @@ CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_BEAT_SCHEDULE = {
+    'load-osm-data': {
+        'task': 'datahub.tasks.load_osm_data',
+        'schedule': int(os.environ.get("OSM_SCHEDULE_MINUTES", "720")) * 60,
+        'options': {'queue': 'main'}
+    }
+}
 
 DEFAULT_BBOX = '60.260904,24.499405,60.352655,24.668588'
 

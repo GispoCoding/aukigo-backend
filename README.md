@@ -43,6 +43,8 @@ host instead of localhost if using other host.
     DJANGO_SUPERUSER_USERNAME=admin
     DJANGO_SUPERUSER_PASSWORD=very-secure-password
     DJANGO_SUPERUSER_EMAIL=your.email@domain.com
+   
+    OSM_SCHEDULE_MINUTES=720
     ```
 
 2. Spin up the app in production mode:
