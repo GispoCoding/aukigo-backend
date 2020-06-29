@@ -82,22 +82,45 @@ class OsmLoadingTests(TestCase):
         self.maxDiff = None
         self.polygon = TEST_POLYGON
         self.bbox = TEST_BBOX
-        area = AreaOfInterest.objects.create(name="Test", bbox=self.polygon)
+        self.area = AreaOfInterest.objects.create(name="Test", bbox=self.polygon)
         self.layer = OsmLayer.objects.create(name="Camping", tags=["leisure=firepit"])
-        self.layer.areas.add(area)
+        self.layer.areas.add(self.area)
         self.layer.save()
         self.loader = OsmLoader()
 
-    def test_osm_data_processing_with_firepit_points(self):
-        with open(os.path.join(settings.TEST_DATA_DIR, "firepit.osm")) as f:
-            data = f.read()
+    def test_with_firepit_points_multiple_times(self):
+        features = self.loader._overpass_xml_to_geojson_features(read_json("firepit.osm"))
+        self.assertEqual(len(features), 7)
+        self.loader._synchronize_features(self.layer, self.area, features)
+        ids, new_ids = self.loader._synchronize_features(self.layer, self.area, features)
+        self.assertEqual(len(ids), 7)
+        self.assertEqual(len(new_ids), 0)
+        self.assertEqual(OsmPoint.objects.first().layers.count(), 1)
+        self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 7)
+
+    def test_with_hiking_routes(self):
+        features = self.loader._overpass_xml_to_geojson_features(read_json("hiking_routes.osm"))
+        self.assertEqual(len(features), 462)
+        ids, new_ids = self.loader._synchronize_features(self.layer, self.area, features)
+        self.assertEqual(len(ids), 462)
+        self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 67)
+        lines_qs = OsmLine.objects.filter(layers=self.layer)
+        self.assertEqual(lines_qs.count(), 395)
+        self.assertEqual(lines_qs.filter(z_order__gt=1).count(), 69)
+
+    def test_with_firepit_points(self):
+        data = read_json("firepit.osm")
 
         features = self.loader._overpass_xml_to_geojson_features(data)
         self.assertEqual(len(features), 7)
-        ids, new_ids = self.loader._save_features(self.layer, features)
+        ids, new_ids = self.loader._synchronize_features(self.layer, self.area, features)
         self.assertEqual(len(ids), 7)
         self.assertEqual(len(new_ids), 7)
         self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 7)
+
+        related = self.layer.get_related(self.layer.areas.first())
+        self.assertEqual(related[GeomType.POINT],
+                         {7505611520, 4623471079, 4623471080, 888747755, 2919437626, 7505611518, 7505611519})
 
         tileset = self.layer.tilesets.first()
         response = self.client.get(reverse("api-root") + f"tilesets/{tileset.pk}/").json()
@@ -113,37 +136,34 @@ class OsmLoadingTests(TestCase):
                     'center': [24.60960395, 60.309802350000005, 8]}
         self.assertEqual(response, expected)
 
-    def test_osm_data_processing_with_firepit_points_multiple_times(self):
-        with open(os.path.join(settings.TEST_DATA_DIR, "firepit.osm")) as f:
-            data = f.read()
-
-        features = self.loader._overpass_xml_to_geojson_features(data)
-        self.assertEqual(len(features), 7)
-        self.loader._save_features(self.layer, features)
-        ids, new_ids = self.loader._save_features(self.layer, features)
-        self.assertEqual(len(ids), 7)
-        self.assertEqual(len(new_ids), 0)
-        self.assertEqual(OsmPoint.objects.first().layers.count(), 1)
-        self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 7)
-
-    def test_osm_data_processing_with_hiking_routes(self):
-        with open(os.path.join(settings.TEST_DATA_DIR, "hiking_routes.osm")) as f:
-            data = f.read()
-        features = self.loader._overpass_xml_to_geojson_features(data)
-        self.assertEqual(len(features), 462)
-        ids, new_ids = self.loader._save_features(self.layer, features)
-        self.assertEqual(len(ids), 462)
-        self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 67)
-        lines_qs = OsmLine.objects.filter(layers=self.layer)
-        self.assertEqual(lines_qs.count(), 395)
-        self.assertEqual(lines_qs.filter(z_order__gt=1).count(), 69)
-
-    def test_osm_data_processing_with_administrative_boundary(self):
-        with open(os.path.join(settings.TEST_DATA_DIR, "administrative_boundary.osm")) as f:
-            data = f.read()
-        features = self.loader._overpass_xml_to_geojson_features(data)
-        ids, new_ids = self.loader._save_features(self.layer, features)
+    def test_with_administrative_boundary(self):
+        features = self.loader._overpass_xml_to_geojson_features(read_json("administrative_boundary.osm"))
+        ids, new_ids = self.loader._synchronize_features(self.layer, self.area, features)
         self.assertEqual(len(ids), 85)
         self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 11)
         self.assertEqual(OsmLine.objects.filter(layers=self.layer).count(), 66)
         self.assertEqual(OsmPolygon.objects.filter(layers=self.layer).count(), 8)
+
+    def test_with_deleted_features_removes_existing(self):
+        features = self.loader._overpass_xml_to_geojson_features(read_json("firepit.osm"))
+        self.loader._synchronize_features(self.layer, self.area, features)
+        ids, new_ids = self.loader._synchronize_features(self.layer, self.area, features[:-2])
+        self.assertEqual(len(ids), 5)
+        self.assertEqual(len(new_ids), 0)
+        self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 5)
+
+    def test_with_deleted_features_removes_existing2(self):
+        features = self.loader._overpass_xml_to_geojson_features(read_json("firepit.osm"))
+        self.loader._synchronize_features(self.layer, self.area, features)
+        ids, new_ids = self.loader._synchronize_features(self.layer, self.area, [])
+        self.assertEqual(ids, set())
+        self.assertEqual(new_ids, set())
+        self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 0)
+        self.assertEqual(self.layer.tilesets.count(), 0)
+
+
+# Helper functions
+def read_json(fixture):
+    with open(os.path.join(settings.TEST_DATA_DIR, fixture)) as f:
+        data = f.read()
+    return data

@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 class OsmLoader:
     URL = f"{settings.OVERPASS_API_URL}/interpreter"
     KILL_EXISTING_QUERIES_URL = f"{settings.OVERPASS_API_URL}/kill_my_queries"
-    # TODO: should Newer be used and should removed be deleted?
     QUERY_TEMPLATE = '''
 // gather results
 [out:xml][timeout:{timeout}];
@@ -84,7 +83,7 @@ class OsmLoader:
                 f"Query failed for following area: '{area}'. Query: {query} \n Headers: {r.headers} \n Skpping...")
             return False
 
-        ids, new_ids = self._save_features(layer, features)
+        ids, new_ids = self._synchronize_features(layer, area, features)
 
         logger.info(f"Processed layer '{layer}': {len(ids)} features. {len(new_ids)} new features.")
         return len(ids) > 0
@@ -133,16 +132,17 @@ class OsmLoader:
         return features
 
     @staticmethod
-    def _save_features(layer: OsmLayer, features: []) -> Tuple[Set, Set]:
+    def _synchronize_features(layer: OsmLayer, area: AreaOfInterest, features: list) -> Tuple[Set, Set]:
         """
-        Save Geojson features as model objects
+        Save Geojson features as model objects and delete removed features
         :param layer: OsmLayer object
+        :params area: AreaOfInterest object
         :param features: in Geojson format
         :return: all ids and new ids as sets
         """
-        included_types = set()
-        ids = set()
-        new_ids = set()
+        existing_ids_dict = layer.get_related(area)
+
+        id_dict = GeomType.get_empty_dict()
         for feature in features:
             props = feature['properties']
             # if osm_way_id is present, it represents that the geometry is closed way instead of relation
@@ -156,19 +156,33 @@ class OsmLoader:
                 values["z_order"] = props.get("z_order", 0)
 
             obj, created = geom_type.osm_model.objects.update_or_create(pk=osmid, defaults=values)
+            id_dict[geom_type].add(osmid)
 
             if created:
-                new_ids.add(osmid)
                 logger.debug(f"New {geom_type.name} created: {osmid}")
 
-            ids.add(osmid)
             if layer not in obj.layers.all():
                 obj.layers.add(layer)
                 obj.save()
-            included_types.add(geom_type)
 
-        # Create views
-        for geom_type in included_types:
-            layer.add_support_for_type(geom_type)
+        all_ids = set()
+        new_ids = set
 
-        return ids, new_ids
+        for geom_type, ids in id_dict.items():
+            existing_ids = existing_ids_dict[geom_type]
+            old_ids = existing_ids.difference(ids)
+            all_ids = all_ids.union(ids)
+            new_ids = new_ids.union(ids.difference(existing_ids))
+
+            if len(old_ids):
+                # Delete features that do not exist anymore
+                geom_type.osm_model.objects.filter(pk__in=old_ids).delete()
+                logger.info(f"Deleted {len(old_ids)} {geom_type.name} features")
+
+            if len(ids):
+                # Create views
+                layer.add_support_for_type(geom_type)
+            else:
+                layer.remove_support_from_type(geom_type)
+
+        return all_ids, new_ids

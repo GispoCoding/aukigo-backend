@@ -86,11 +86,19 @@ class OsmLayer(Layer):
                              help_text="Leave this field empty. It is populated programmatically.")
 
     def delete(self, using=None, keep_parents=False):
-        self._drop_view()
+        self._drop_views()
         return super().delete(using, keep_parents)
 
-    def get_bounds(self, geom_type: GeomType):
+    def get_bounds(self, geom_type: GeomType) -> Tuple[float, float, float, float]:
         return geom_type.osm_model.objects.filter(layers=self.pk).aggregate(Extent('geom'))['geom__extent']
+
+    def get_related(self, area: AreaOfInterest) -> {GeomType: set}:
+        bbox = area.bbox
+        return {
+            GeomType.POINT: set(self.osmpoint_set.filter(geom__intersects=bbox).values_list('pk', flat=True)),
+            GeomType.LINE: set(self.osmline_set.filter(geom__intersects=bbox).values_list('pk', flat=True)),
+            GeomType.POLYGON: set(self.osmpolygon_set.filter(geom__intersects=bbox).values_list('pk', flat=True)),
+        }
 
     @property
     def views(self) -> [str]:
@@ -131,10 +139,30 @@ class OsmLayer(Layer):
 
             Tileset.objects.create(layer=self, table=view_name, geom_type=geom_type.name)
 
-    def _get_view_name_for_type(self, geom_type: GeomType):
+    def remove_support_from_type(self, geom_type: GeomType, using=DEFAULT_DB_ALIAS) -> None:
+        """
+        Removes support from geometry type
+        :param geom_type:  geometry type to remove support from
+        :param using: Database key
+        :return:
+        """
+
+        if geom_type in self.geom_types:
+            connection = connections[using]
+            with connection.cursor() as cursor:
+                sql = f'DROP VIEW IF EXISTS {self._get_view_name_for_type(geom_type)}'
+                logger.debug(sql)
+                cursor.execute(sql)
+
+            self._geom_types.remove(geom_type.name)
+            self.save()
+
+            Tileset.objects.filter(layer=self, geom_type=geom_type.name).delete()
+
+    def _get_view_name_for_type(self, geom_type: GeomType) -> str:
         return f"{settings.PG_VIEW_PREFIX}_{self.name.lower()}_{geom_type.value['postfix']}"
 
-    def _drop_view(self):
+    def _drop_views(self):
         connection = connections[DEFAULT_DB_ALIAS]
 
         with connection.cursor() as cursor:
