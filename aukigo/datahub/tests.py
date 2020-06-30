@@ -163,6 +163,19 @@ class OsmLoadingTests(TestCase):
         self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 0)
         self.assertEqual(self.layer.tilesets.count(), 0)
 
+    def test_with_deleted_features_removes_existing3(self):
+        layer2 = OsmLayer.objects.create(name="test2")
+        layer2.areas.add(self.area)
+        features = self.loader._overpass_xml_to_geojson_features(read_json("firepit.osm"))
+        self.loader._synchronize_features(self.layer, self.area, features)
+        self.loader._synchronize_features(layer2, self.area, features)
+        ids, new_ids = self.loader._synchronize_features(self.layer, self.area, [])
+        self.assertEqual(ids, set())
+        self.assertEqual(new_ids, set())
+        self.assertEqual(self.layer.tilesets.count(), 0)
+        self.assertEqual(layer2.tilesets.count(), 1)
+        self.assertEqual(OsmPoint.objects.filter(layers=layer2).count(), 7)
+
 
 # Helper functions
 def read_json(fixture):

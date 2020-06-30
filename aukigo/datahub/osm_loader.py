@@ -134,7 +134,7 @@ class OsmLoader:
     @staticmethod
     def _synchronize_features(layer: OsmLayer, area: AreaOfInterest, features: list) -> Tuple[Set, Set]:
         """
-        Save Geojson features as model objects and delete removed features
+        Save Geojson features as model objects and removes layer from features that do not belong to it anymore
         :param layer: OsmLayer object
         :params area: AreaOfInterest object
         :param features: in Geojson format
@@ -175,9 +175,11 @@ class OsmLoader:
             new_ids = new_ids.union(ids.difference(existing_ids))
 
             if len(old_ids):
-                # Delete features that do not exist anymore
-                geom_type.osm_model.objects.filter(pk__in=old_ids).delete()
-                logger.info(f"Deleted {len(old_ids)} {geom_type.name} features")
+                # Remove layer from features that do not belong to it anymore
+                # There might have been tag changes that cause otherwise existing feature
+                # to not appear in the query
+                for feat in geom_type.osm_model.objects.filter(pk__in=old_ids):
+                    feat.remove_from_layer(layer)
 
             if len(ids):
                 # Create views

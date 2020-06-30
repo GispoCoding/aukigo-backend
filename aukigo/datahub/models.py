@@ -214,6 +214,19 @@ class OsmFeature(models.Model):
     class Meta:
         abstract = True
 
+    def remove_from_layer(self, layer: OsmLayer) -> None:
+        """
+        Remove layer from feature and delete it if it does not have any layers left
+        :param layer: OsmLayer
+        :return:
+        """
+        if layer in self.layers.all():
+            self.layers.remove(layer)
+            self.save()
+        if self.layers.count() == 0:
+            logger.debug(f"Deleted feature {self}")
+            self.delete()
+
 
 class OsmPoint(OsmFeature):
     geom = models.PointField(srid=settings.SRID)
