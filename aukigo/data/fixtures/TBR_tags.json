@@ -7,15 +7,35 @@
     }
   },
   {
+    "model": "datahub.areaofinterest",
+    "pk": "Turku",
+    "fields": {
+      "bbox": "SRID=4326;POLYGON ((22.109 60.346, 22.485 60.36, 22.432 60.738, 22.051 60.724, 22.109 60.346))"
+    }
+  },
+  {
     "model": "datahub.layer",
     "pk": 1,
     "fields": {
       "name": "Lodging",
+      "description": "",
+      "version": "1.0.0",
+      "attribution": "<a href='http://openstreetmap.org'>OSM contributors</a>",
+      "template": "",
+      "legend": "",
+      "minzoom": 1,
+      "maxzoom": 24,
+      "default_zoom": 8
+    }
+  },
+  {
+    "model": "datahub.osmlayer",
+    "pk": 1,
+    "fields": {
       "tags": "[\"tourism~[hm]os?tel\", \"tourism=quest_house\", \"tourism=camp_site\", \"tourism=apartment\"]",
-      "is_osm_layer": true,
-      "_geom_types": "[]",
+      "_geom_types": null,
       "areas": [
-        "Nuuksio"
+        "Turku"
       ]
     }
   },
@@ -24,11 +44,24 @@
     "pk": 2,
     "fields": {
       "name": "Shops",
+      "description": "",
+      "version": "1.0.0",
+      "attribution": "<a href='http://openstreetmap.org'>OSM contributors</a>",
+      "template": "",
+      "legend": "",
+      "minzoom": 1,
+      "maxzoom": 24,
+      "default_zoom": 8
+    }
+  },
+  {
+    "model": "datahub.osmlayer",
+    "pk": 2,
+    "fields": {
       "tags": "[\"shop=*\", \"amenity=marketplace\"]",
-      "is_osm_layer": true,
-      "_geom_types": "[]",
+      "_geom_types": null,
       "areas": [
-        "Nuuksio"
+        "Turku"
       ]
     }
   },
@@ -37,11 +70,24 @@
     "pk": 3,
     "fields": {
       "name": "Finance",
+      "description": "",
+      "version": "1.0.0",
+      "attribution": "<a href='http://openstreetmap.org'>OSM contributors</a>",
+      "template": "",
+      "legend": "",
+      "minzoom": 1,
+      "maxzoom": 24,
+      "default_zoom": 8
+    }
+  },
+  {
+    "model": "datahub.osmlayer",
+    "pk": 3,
+    "fields": {
       "tags": "[\"amenity=bank\", \"amenity=post_box\", \"amenity=post_office\", \"amenity=post_depot\", \"amenity=atm\"]",
-      "is_osm_layer": true,
-      "_geom_types": "[]",
+      "_geom_types": null,
       "areas": [
-        "Nuuksio"
+        "Turku"
       ]
     }
   },
@@ -50,11 +96,24 @@
     "pk": 6,
     "fields": {
       "name": "Health",
+      "description": "",
+      "version": "1.0.0",
+      "attribution": "<a href='http://openstreetmap.org'>OSM contributors</a>",
+      "template": "",
+      "legend": "",
+      "minzoom": 1,
+      "maxzoom": 24,
+      "default_zoom": 8
+    }
+  },
+  {
+    "model": "datahub.osmlayer",
+    "pk": 6,
+    "fields": {
       "tags": "[\"amenity=clinic\", \"amenity=dentist\", \"amenity=doctors\", \"amenity=hospital\", \"amenity=pharmacy\", \"amenity=veterinary\"]",
-      "is_osm_layer": true,
       "_geom_types": null,
       "areas": [
-        "Nuuksio"
+        "Turku"
       ]
     }
   },
@@ -63,11 +122,24 @@
     "pk": 7,
     "fields": {
       "name": "Attractions",
+      "description": "",
+      "version": "1.0.0",
+      "attribution": "<a href='http://openstreetmap.org'>OSM contributors</a>",
+      "template": "",
+      "legend": "",
+      "minzoom": 1,
+      "maxzoom": 24,
+      "default_zoom": 8
+    }
+  },
+  {
+    "model": "datahub.osmlayer",
+    "pk": 7,
+    "fields": {
       "tags": "[\"building=church\", \"amenity=place_of_worship\", \"building=mosque\", \"building=synagogue\", \"tourism=attraction\", \"historic=memorial\", \"building=temple\", \"tourism=museum\", \"tourism=viewpoint\", \"historic~castle.*\", \"historic=monument\", \"historic=tomb\", \"historic=wayside_shrine\"]",
-      "is_osm_layer": true,
-      "_geom_types": "[]",
+      "_geom_types": null,
       "areas": [
-        "Nuuksio"
+        "Turku"
       ]
     }
   },
@@ -76,11 +148,24 @@
     "pk": 8,
     "fields": {
       "name": "Transportation",
+      "description": "",
+      "version": "1.0.0",
+      "attribution": "<a href='http://openstreetmap.org'>OSM contributors</a>",
+      "template": "",
+      "legend": "",
+      "minzoom": 1,
+      "maxzoom": 24,
+      "default_zoom": 8
+    }
+  },
+  {
+    "model": "datahub.osmlayer",
+    "pk": 8,
+    "fields": {
       "tags": "[\"amenity=bus_station\", \"public_transport=station\", \"building=train_station\", \"building=transportation\", \"amenity=taxi\", \"aeroway=aerodrome\", \"amenity~.*parking\", \"amenity~.*rental\", \"railway=subway_entrance\", \"amenity~.*sharing\", \"amenity=fuel\"]",
-      "is_osm_layer": true,
-      "_geom_types": "[]",
+      "_geom_types": null,
       "areas": [
-        "Nuuksio"
+        "Turku"
       ]
     }
   },
@@ -89,11 +174,24 @@
     "pk": 9,
     "fields": {
       "name": "Food",
+      "description": "",
+      "version": "1.0.0",
+      "attribution": "<a href='http://openstreetmap.org'>OSM contributors</a>",
+      "template": "",
+      "legend": "",
+      "minzoom": 1,
+      "maxzoom": 24,
+      "default_zoom": 8
+    }
+  },
+  {
+    "model": "datahub.osmlayer",
+    "pk": 9,
+    "fields": {
       "tags": "[\"amenity=restaurant\", \"amenity=fast_food\", \"amenity=pub\", \"amenity=bar\", \"amenity=cafe\"]",
-      "is_osm_layer": true,
-      "_geom_types": "[]",
+      "_geom_types": null,
       "areas": [
-        "Nuuksio"
+        "Turku"
       ]
     }
   },
@@ -102,11 +200,24 @@
     "pk": 10,
     "fields": {
       "name": "Entertainment",
+      "description": "",
+      "version": "1.0.0",
+      "attribution": "<a href='http://openstreetmap.org'>OSM contributors</a>",
+      "template": "",
+      "legend": "",
+      "minzoom": 1,
+      "maxzoom": 24,
+      "default_zoom": 8
+    }
+  },
+  {
+    "model": "datahub.osmlayer",
+    "pk": 10,
+    "fields": {
       "tags": "[\"leisure=park\", \"leisure=sauna\", \"amenity=sauna\", \"amenity=nightclub\", \"amenity=cinema\", \"amenity=theatre\", \"leisure=stadium\", \"building=stadium\", \"amenity=library\", \"amenity=casino\", \"leisure=fitness_centre\", \"leisure=sports_centre\", \"leisure~swimming.*\", \"leisure=water_park\", \"tourism=zoo\", \"man_made=pier\", \"leisure=pitch\", \"sport=soccer\", \"sport=basketball\", \"sport=athletics\"]",
-      "is_osm_layer": true,
-      "_geom_types": "[]",
+      "_geom_types": null,
       "areas": [
-        "Nuuksio"
+        "Turku"
       ]
     }
   }
