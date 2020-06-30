@@ -240,7 +240,7 @@ OVERPASS_API_URL = 'http://overpass-api.de/api'
 OSM_CONFIG = os.path.join(DATA_DIR, "osmconf.ini")
 
 # pg_tileserv
-PG_TILESERV_PORT = int(os.environ.get("PG_TILESERV_PORT", "7800"))
+PG_TILESERV_POSTFIX = os.environ.get("PG_TILESERV_POSTFIX", ":7800")
 
 # misc
 PG_VIEW_PREFIX = 'osm'

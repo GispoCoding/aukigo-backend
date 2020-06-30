@@ -33,10 +33,10 @@ class TilesetSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_tiles(self, instance):
         request = self.context['request']
-        pg_tileserv_url = "{sheme}://{host}:{port}".format(
+        pg_tileserv_url = "{sheme}://{host}{postfix}".format(
             sheme=request.scheme,
             host=request.get_host().split(":")[0],
-            port=settings.PG_TILESERV_PORT
+            postfix=settings.PG_TILESERV_POSTFIX
         )
         vector_props = "{z}/{x}/{y}.pbf"
         tileurl = f"{pg_tileserv_url}/public.{instance.table}/{vector_props}"

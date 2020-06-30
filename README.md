@@ -44,6 +44,7 @@ host instead of localhost if using other host.
     DJANGO_SUPERUSER_PASSWORD=very-secure-password
     DJANGO_SUPERUSER_EMAIL=your.email@domain.com
    
+    PG_TILESERV_POSTFIX=/tiles
     OSM_SCHEDULE_MINUTES=720
     ```
 

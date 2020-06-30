@@ -40,7 +40,7 @@ class UtilsTests(TestCase):
         self.assertEqual(overpass_tags, expected)
 
 
-@override_settings(VIEW_PREFIX='osm', PG_TILESERV_PORT=7800)
+@override_settings(VIEW_PREFIX='osm', PG_TILESERV_POSTFIX='/tiles')
 class ModelsTest(TestCase):
 
     def test_osmlayer_with_points(self):
@@ -72,7 +72,7 @@ class ModelsTest(TestCase):
                           'template': None,
                           'tags': [],
                           'legend': None, 'scheme': 'xyz',
-                          'tiles': ['http://testserver:7800/public.osm_test_p/{z}/{x}/{y}.pbf'], 'grids': [],
+                          'tiles': ['http://testserver/tiles/public.osm_test_p/{z}/{x}/{y}.pbf'], 'grids': [],
                           'data': [], 'minzoom': 1, 'maxzoom': 30, 'bounds': None,
                           'center': None}
                          )
