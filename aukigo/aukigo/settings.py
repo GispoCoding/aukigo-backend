@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.gis',
     # Third party
     'rest_framework',
+    'rest_framework_gis',
     'django_better_admin_arrayfield',
     # Own apps
     'datahub.apps.DatahubConfig',
@@ -120,20 +121,23 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     # TODO: Uncomment following to prevent the use of browsable api
     #
-    #     'DEFAULT_RENDERER_CLASSES': (
-    #         'rest_framework.renderers.JSONRenderer',
-    #     )
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-    ],
+    # 'DEFAULT_RENDERER_CLASSES': (
+    #     'rest_framework.renderers.JSONRenderer',
+    # ),
+    # 'DEFAULT_AUTHENTICATION_CLASSES': [
+    #     'rest_framework.authentication.TokenAuthentication',
+    # ],
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '10/minute',
-        'user': '1000/day'
-    }
+        'anon': '10/minute' if not DEBUG else '60/minute',
+        'user': '1000/day' if not DEBUG else '60/minute'
+    },
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
 }
 
 # Internationalization
@@ -213,6 +217,13 @@ CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_BEAT_SCHEDULE = {
+    'load-osm-data': {
+        'task': 'datahub.tasks.load_osm_data',
+        'schedule': int(os.environ.get("OSM_SCHEDULE_MINUTES", "720")) * 60,
+        'options': {'queue': 'main'}
+    }
+}
 
 DEFAULT_BBOX = '60.260904,24.499405,60.352655,24.668588'
 
@@ -229,7 +240,7 @@ OVERPASS_API_URL = 'http://overpass-api.de/api'
 OSM_CONFIG = os.path.join(DATA_DIR, "osmconf.ini")
 
 # pg_tileserv
-PG_TILESERV_PORT = int(os.environ.get("PG_TILESERV_PORT", "7800"))
+PG_TILESERV_POSTFIX = os.environ.get("PG_TILESERV_POSTFIX", ":7800")
 
 # misc
 PG_VIEW_PREFIX = 'osm'

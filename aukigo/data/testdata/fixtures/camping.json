@@ -1,21 +1,17 @@
 [
   {
-    "model": "datahub.areaofinterest",
-    "pk": "Test",
-    "fields": {
-      "bbox": "SRID=4326;POLYGON ((24.499 60.26, 24.499 60.352, 24.668 60.352, 24.668 60.26, 24.499 60.26))"
-    }
-  },
-  {
     "model": "datahub.layer",
     "pk": 1,
     "fields": {
       "name": "camping",
-      "tags": "[\"leisure=firepit\"]",
-      "is_osm_layer": true,
-      "areas": [
-        "Test"
-      ]
+      "description": "Camping desc",
+      "version": "1.0.0",
+      "attribution": "<a href='http://openstreetmap.org'>OSM contributors</a>",
+      "template": "Template",
+      "legend": "Camping data",
+      "minzoom": 1,
+      "maxzoom": 24,
+      "default_zoom": 8
     }
   },
   {
@@ -23,11 +19,14 @@
     "pk": 2,
     "fields": {
       "name": "tourism",
-      "tags": "[\"tourism~[hm]o.?tel\"]",
-      "is_osm_layer": true,
-      "areas": [
-        "Test"
-      ]
+      "description": "",
+      "version": "1.0.0",
+      "attribution": null,
+      "template": "",
+      "legend": null,
+      "minzoom": 1,
+      "maxzoom": 30,
+      "default_zoom": 8
     }
   },
   {
@@ -35,8 +34,51 @@
     "pk": 3,
     "fields": {
       "name": "tourism2",
-      "tags": "[\"tourism~=[hm]o.?tel\", \"tourism=camp_site\"]",
-      "is_osm_layer": true,
+      "description": "",
+      "version": "1.0.0",
+      "attribution": null,
+      "template": "",
+      "legend": null,
+      "minzoom": 1,
+      "maxzoom": 30,
+      "default_zoom": 8
+    }
+  },
+  {
+    "model": "datahub.areaofinterest",
+    "pk": "Test",
+    "fields": {
+      "bbox": "SRID=4326;POLYGON ((24.499 60.26, 24.499 60.352, 24.668 60.352, 24.668 60.26, 24.499 60.26))"
+    }
+  },
+  {
+    "model": "datahub.osmlayer",
+    "pk": 1,
+    "fields": {
+      "tags": "[\"leisure=firepit\"]",
+      "_geom_types": null,
+      "areas": [
+        "Test"
+      ]
+    }
+  },
+  {
+    "model": "datahub.osmlayer",
+    "pk": 2,
+    "fields": {
+      "tags": "[\"tourism~[hm]o.?tel\"]",
+      "_geom_types": null,
+      "areas": [
+        "Test"
+      ]
+    }
+  },
+  {
+    "model": "datahub.osmlayer",
+    "pk": 3,
+    "fields": {
+      "tags": "[\"tourism~[hm]o.?tel\", \"tourism=camp_site\"]",
+      "_geom_types": null,
       "areas": [
         "Test"
       ]

@@ -35,6 +35,14 @@ class GeomType(enum.Enum):
         else:
             return GeomType.POLYGON
 
+    @staticmethod
+    def get_empty_dict():
+        return {
+            GeomType.POINT: set(),
+            GeomType.LINE: set(),
+            GeomType.POLYGON: set(),
+        }
+
 
 def polygon_to_overpass_bbox(geom: Polygon) -> Tuple[float, float, float, float]:
     """

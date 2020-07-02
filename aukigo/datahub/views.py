@@ -1,45 +1,57 @@
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Layer
+from .models import Tileset, AreaOfInterest, WMTSBasemap, VectorTileBasemap
+from .serializers import (TilesetSerializer, AreaOfInterestSerializer, OsmLayer, OsmLayerSerializer,
+                          WTMSBasemapSerializer, VectorTileBasemapSerializer)
 from .tasks import load_osm_data
 
 
+# ViewSets define the view behavior.
+class TilesetViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Tileset.objects.all()
+    serializer_class = TilesetSerializer
+
+
+class AreaViewSet(viewsets.ModelViewSet):
+    queryset = AreaOfInterest.objects.all()
+    serializer_class = AreaOfInterestSerializer
+
+
+class OsmLayerViewSet(viewsets.ModelViewSet):
+    queryset = OsmLayer.objects.all()
+    serializer_class = OsmLayerSerializer
+
+
+class WMTSBasemapViewSet(viewsets.ModelViewSet):
+    queryset = WMTSBasemap.objects.all()
+    serializer_class = WTMSBasemapSerializer
+
+
+class VectorTileBasemapViewSet(viewsets.ModelViewSet):
+    queryset = VectorTileBasemap.objects.all()
+    serializer_class = VectorTileBasemapSerializer
+
+
 class Capabilities(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get(self, request):
-        pg_tileserv_url = "{sheme}://{host}:{port}".format(
-            sheme=request.scheme,
-            host=request.get_host().split(":")[0],
-            port=settings.PG_TILESERV_PORT
-        )
+        def serialize_all(view_set: viewsets.ModelViewSet) -> list:
+            return view_set.as_view({'get': 'list'})(request._request).data
 
-        def get_tile_url(name, is_osm):
-            vector_props = "{z}/{x}/{y}.pbf"
-            config_url = f"{pg_tileserv_url}/public.{name}.json"
-            tileurl = f"{pg_tileserv_url}/public.{name}/{vector_props}"
-            if is_osm:
-                tileurl += "?properties=osmid,tags,z_order"
-            return {"config": config_url, "tile": tileurl}
-
-        layers = [{
-            'name': layer.name,
-            'is_osm_layer': layer.is_osm_layer,
-            'tags': layer.tags,
-            'urls': [get_tile_url(layer.name, False)] if not layer.is_osm_layer else [
-                get_tile_url(view, True) for view in layer.views
-            ]
-        } for layer in Layer.objects.all()]
-
-        capabilities = {
-            'basemaps': [],
-            'layers': layers
+        data = {
+            'basemaps': {
+                'WMTS': serialize_all(WMTSBasemapViewSet),
+                'vectorTile': serialize_all(VectorTileBasemapViewSet)
+            },
+            'tilesets': serialize_all(TilesetViewSet)
         }
 
-        return Response(capabilities)
+        return Response(data)
 
 
 @login_required
