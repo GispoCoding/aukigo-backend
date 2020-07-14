@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_gis',
     'django_better_admin_arrayfield',
+    'corsheaders',
     # Own apps
     'datahub.apps.DatahubConfig',
 ]
@@ -58,6 +59,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -139,6 +141,9 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
 }
+
+CORS_ORIGIN_ALLOW_ALL = True if DEBUG else bool(int(os.environ.get("CORS_ORIGIN_ALLOW_ALL", 0)))
+CORS_ORIGIN_WHITELIST = os.environ.get("DJANGO_CORS_WHITELIST", default='http://localhost:8080').split(" ")
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
