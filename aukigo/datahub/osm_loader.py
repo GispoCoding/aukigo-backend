@@ -69,7 +69,7 @@ class OsmLoader:
 
         r = requests.get(self.URL, params={'data': query})
         try:
-            if r.status_code == 426:
+            if r.status_code == 429:
                 # Too many requests, killing existing with instructions
                 # from http://overpass-api.de/command_line.html and retrying using Celery
                 logger.warning(f"Too many requests foor {layer}:{area}, killing existing and retrying...")
