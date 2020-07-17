@@ -134,8 +134,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '10/minute' if not DEBUG else '60/minute',
-        'user': '1000/day' if not DEBUG else '60/minute'
+        'anon': '100/minute' if not DEBUG else '600/minute',
+        'user': '1000/minute' if not DEBUG else '60/minute'
     },
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
