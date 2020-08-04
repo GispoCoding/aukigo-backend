@@ -164,17 +164,17 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-'''
-###################################
-Application specific configurations
-###################################
-'''
-
 HTTPS_IN_USE = int(os.environ.get("HTTPS", 0))
 
 if HTTPS_IN_USE:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
+
+'''
+###################################
+Application specific configurations
+###################################
+'''
 
 # Default coordinate reference system id
 SRID = 4326
