@@ -58,7 +58,7 @@ Nginx should now be listening on port 80.
 
 #### Https configuration
 Easiest way is to have the certificates on the host and add them as volumes to the host.
-* Follow the [Certbot](https://certbot.eff.org/lets-encrypt/ubuntubionic-other) instructions to get the certificates
+* Follow the [Certbot](https://certbot.eff.org/lets-encrypt/ubuntubionic-nginx) instructions to get the certificates
 * Uncomment the line `- /etc/letsencrypt:/etc/letsencrypt` in docker-compose.prod.yml
 * Modify .env to contain right host in DJANGO_CORS_WHITELIST (DJANGO_CORS_WHITELIST=https://your.url.com http://localhost:8080 http://localhost:8000)
 * Set HTTPS=1 in .env 
@@ -66,7 +66,8 @@ Easiest way is to have the certificates on the host and add them as volumes to t
 * Replace *nginx/nginx.conf* with *nginx/nginx_https.conf*, and run:
 
 ```shell script
-docker-compose -f docker-compose.prod.yml up -d --no-deps --build nginx
+docker-compose -f docker-compose.prod.yml down
+docker-compose -f docker-compose.prod.yml up -d --build
 ```
 
 Nginx should now be listening on port 443.
