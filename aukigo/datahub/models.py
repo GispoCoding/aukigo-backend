@@ -7,6 +7,7 @@ from django.contrib.gis.db.models import Extent
 from django.contrib.gis.geos import Polygon
 from django.contrib.postgres.fields import JSONField
 from django.db import DEFAULT_DB_ALIAS, connections
+from django.db.models import QuerySet
 from django_better_admin_arrayfield.models.fields import ArrayField
 
 from .utils import (GeomType, polygon_to_overpass_bbox)
@@ -17,6 +18,11 @@ DEFAULT_BOUNDS = (-180.0, -90.0, 180.0, 90.0)
 
 
 class Layer(models.Model):
+    # TileJSON spec static fields
+    tilejson = "2.2.0"  # Describes the version of the TileJSON spec that is implemented by this JSON object
+    scheme = "xyz"
+    grids = []
+
     # TileJSON spec fields
     name = models.CharField(max_length=200, unique=True)
     description = models.TextField(max_length=1000, blank=True, null=True, help_text="OPTIONAL")
@@ -37,31 +43,66 @@ class Layer(models.Model):
     maxzoom = models.IntegerField(default=30, blank=True, help_text=">= 0, <= 30.")
 
     # Internal fields
+    style = JSONField(blank=True, null=True, help_text="Mapbox Style JSON for all the vector layers")
     default_zoom = models.IntegerField(default=8, blank=True, help_text=">= 0, <= 30.")
 
+    @property
+    def data(self):
+        return ""
+
+    @property
+    def osm_layer(self):
+        return OsmLayer.objects.filter(name=self.name).first()
+
     def get_bounds(self, geom_type: GeomType) -> Tuple[float, float, float, float]:
-        bounds = DEFAULT_BOUNDS
+        bounds = None
         osm_layer: OsmLayer = self.osm_layer
         if osm_layer:
             bounds = osm_layer.get_bounds(geom_type)
+        return bounds if bounds else DEFAULT_BOUNDS
+
+    def get_common_bounds(self) -> Tuple[float, float, float, float]:
+        bounds = DEFAULT_BOUNDS
+        osm_layer: OsmLayer = self.osm_layer
+        if osm_layer:
+            bounds = [sum(col) / float(len(col)) for col in
+                      zip(*[self.get_bounds(geom_type) for geom_type in osm_layer.geom_types])]
         return bounds
 
     def get_center(self, geom_type: GeomType) -> Tuple[float, float, int]:
         bounds = self.get_bounds(geom_type)
         if bounds is not None:
             centroid = Polygon.from_bbox(bounds).centroid
-            return (centroid.x, centroid.y, self.default_zoom)
+            return centroid.x, centroid.y, self.default_zoom
 
-    def get_tags(self):
+    def get_common_center(self) -> Tuple[float, float, int]:
+        bounds = self.get_common_bounds()
+        if bounds is not None:
+            centroid = Polygon.from_bbox(bounds).centroid
+            return centroid.x, centroid.y, self.default_zoom
+
+    def get_tags(self) -> [str]:
         osm_layer: OsmLayer = self.osm_layer
         tags = None
         if osm_layer:
             tags = osm_layer.tags
         return tags if tags is not None else []
 
-    @property
-    def osm_layer(self):
-        return OsmLayer.objects.filter(name=self.name).first()
+    def get_geom_types(self) -> [GeomType]:
+        osm_layer: OsmLayer = self.osm_layer
+        geom_types = []
+        if osm_layer:
+            geom_types = osm_layer.geom_types
+        return geom_types
+
+    def get_vector_layers(self) -> [str]:
+        osm_layer: OsmLayer = self.osm_layer
+        vector_layers = []
+        if osm_layer:
+            vector_layers = osm_layer.views
+        return vector_layers
+
+
 
     def __str__(self):
         return self.name
@@ -97,7 +138,10 @@ class OsmLayer(Layer):
         return super().delete(using, keep_parents)
 
     def get_bounds(self, geom_type: GeomType) -> Tuple[float, float, float, float]:
-        return geom_type.osm_model.objects.filter(layers=self.pk).aggregate(Extent('geom'))['geom__extent']
+        return self.get_objects_for_type(geom_type).aggregate(Extent('geom'))['geom__extent']
+
+    def get_objects_for_type(self, geom_type: GeomType) -> QuerySet:
+        return geom_type.osm_model.objects.filter(layers=self.pk)
 
     def get_related(self, area: AreaOfInterest) -> {GeomType: set}:
         bbox: Polygon = area.bbox.envelope
