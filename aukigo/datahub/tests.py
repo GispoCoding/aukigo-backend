@@ -61,20 +61,23 @@ class ModelsTest(TestCase):
         layer.delete()
 
     def test_api_serialization(self):
+        self.maxDiff = None
         layer = OsmLayer.objects.create(name="test")
         layer.add_support_for_type(GeomType.POINT)
-        tileset = layer.tilesets.first()
-        response = self.client.get(reverse("api-root") + f"tilesets/{tileset.pk}/").json()
+        response = self.client.get(reverse("api-root") + f"layers/{layer.pk}/").json()
         self.assertEqual(response,
-                         {'url': f'http://testserver/api/tilesets/{tileset.pk}/', 'tilejson': '2.2.0', 'name': 'test',
+                         {'url': f'http://testserver/api/layers/{layer.pk}/', 'tilejson': '2.2.0', 'name': 'test',
                           'description': None, 'version': '1.0.0',
                           'attribution': "<a href='http://openstreetmap.org'>OSM contributors</a>",
                           'template': None,
                           'tags': [],
                           'legend': None, 'scheme': 'xyz',
                           'tiles': ['http://testserver/tiles/public.osm_test_p/{z}/{x}/{y}.pbf'], 'grids': [],
-                          'data': [], 'minzoom': 1, 'maxzoom': 30, 'bounds': None,
-                          'center': None}
+                          'data': ['http://testserver/api/osm_geojson/1/POINT.geojson'],
+                          'minzoom': 1, 'maxzoom': 30, 'bounds': [-180.0, -90.0, 180.0, 90.0],
+                          'center': [-0.0, -0.0, 8],
+                          'vector_layers': ['osm_test_p'],
+                          'style': None}
                          )
 
 
@@ -110,6 +113,7 @@ class OsmLoadingTests(TestCase):
         self.assertEqual(lines_qs.filter(z_order__gt=1).count(), 69)
 
     def test_with_firepit_points(self):
+        self.maxDiff = None
         data = read_json("firepit.osm")
 
         features = self.loader._overpass_xml_to_geojson_features(data)
@@ -123,9 +127,8 @@ class OsmLoadingTests(TestCase):
         self.assertEqual(related[GeomType.POINT],
                          {7505611520, 4623471079, 4623471080, 888747755, 2919437626, 7505611518, 7505611519})
 
-        tileset = self.layer.tilesets.first()
-        response = self.client.get(reverse("api-root") + f"tilesets/{tileset.pk}/").json()
-        expected = {'url': f'http://testserver/api/tilesets/{tileset.pk}/', 'tilejson': '2.2.0', 'name': 'Camping',
+        response = self.client.get(reverse("api-root") + f"layers/{self.layer.pk}/").json()
+        expected = {'url': f'http://testserver/api/layers/{self.layer.pk}/', 'tilejson': '2.2.0', 'name': 'Camping',
                     'description': None, 'version': '1.0.0',
                     'attribution': "<a href='http://openstreetmap.org'>OSM contributors</a>",
                     'template': None,
@@ -133,7 +136,10 @@ class OsmLoadingTests(TestCase):
                     'tiles': ['http://testserver:7800/public.osm_camping_p/{z}/{x}/{y}.pbf'],
                     'grids': [],
                     'tags': ['leisure=firepit'],
-                    'data': [], 'minzoom': 1, 'maxzoom': 30,
+                    'data': [f'http://testserver/api/osm_geojson/{self.layer.pk}/POINT.geojson'],
+                    'style': None,
+                    'vector_layers': ['osm_camping_p'],
+                    'minzoom': 1, 'maxzoom': 30,
                     'bounds': [24.5552907, 60.2697246, 24.6639172, 60.3498801],
                     'center': [24.60960395, 60.309802350000005, 8]}
         self.assertEqual(response, expected)

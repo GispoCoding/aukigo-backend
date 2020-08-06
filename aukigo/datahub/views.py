@@ -4,16 +4,24 @@ from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Tileset, AreaOfInterest, WMTSBasemap, VectorTileBasemap
+from .models import Tileset, AreaOfInterest, WMTSBasemap, VectorTileBasemap, Layer
 from .serializers import (TilesetSerializer, AreaOfInterestSerializer, OsmLayer, OsmLayerSerializer,
-                          WTMSBasemapSerializer, VectorTileBasemapSerializer)
+                          WTMSBasemapSerializer, VectorTileBasemapSerializer, LayerSerializer, OsmPointSerializer,
+                          OsmPolygonSerializer, OsmLineSerializer)
 from .tasks import load_osm_data
 
-
 # ViewSets define the view behavior.
+from .utils import GeomType
+
+
 class TilesetViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tileset.objects.all()
     serializer_class = TilesetSerializer
+
+
+class LayerViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Layer.objects.all()
+    serializer_class = LayerSerializer
 
 
 class AreaViewSet(viewsets.ModelViewSet):
@@ -48,10 +56,28 @@ class Capabilities(APIView):
                 'WMTS': serialize_all(WMTSBasemapViewSet),
                 'vectorTile': serialize_all(VectorTileBasemapViewSet)
             },
-            'tilesets': serialize_all(TilesetViewSet)
+            'tilesets': serialize_all(LayerViewSet)
         }
 
         return Response(data)
+
+
+class OsmGeojsons(APIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def get(self, request, layer, gtype):
+        gtype = GeomType[gtype]
+        layer = Layer.objects.get(pk=layer)
+        objects = layer.osm_layer.get_objects_for_type(gtype)
+
+        if gtype == GeomType.POINT:
+            serializer_class = OsmPointSerializer
+        elif gtype == GeomType.LINE:
+            serializer_class = OsmLineSerializer
+        else:
+            serializer_class = OsmPolygonSerializer
+        serializer = serializer_class(objects, many=True)
+        return JsonResponse(serializer.data, safe=False)
 
 
 @login_required
