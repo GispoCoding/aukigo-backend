@@ -9,7 +9,6 @@ from .serializers import (TilesetSerializer, AreaOfInterestSerializer, OsmLayer,
                           WTMSBasemapSerializer, VectorTileBasemapSerializer, LayerSerializer, OsmPointSerializer,
                           OsmPolygonSerializer, OsmLineSerializer)
 from .tasks import load_osm_data
-
 # ViewSets define the view behavior.
 from .utils import GeomType
 
@@ -77,7 +76,15 @@ class OsmGeojsons(APIView):
         else:
             serializer_class = OsmPolygonSerializer
         serializer = serializer_class(objects, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        data = serializer.data
+
+        # flatten tags TODO: make more efficient and Pythonic if Geojson format is needed in production
+        for feat in data['features']:
+            props = feat['properties']
+            tags = props.pop('tags', {})
+            feat['properties'] = {**props, **tags}
+
+        return JsonResponse(data, safe=False)
 
 
 @login_required

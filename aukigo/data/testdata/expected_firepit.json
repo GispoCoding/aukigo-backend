@@ -1,0 +1,108 @@
+{
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          24.6006042,
+          60.3498801
+        ],
+        "type": "Point"
+      },
+      "id": 888747755,
+      "properties": {
+        "amenity": "shelter",
+        "leisure": "firepit",
+        "name": "Kämmenlammen laavu",
+        "shelter_type": "lean_to",
+        "source": "survey;https://www.vihti.fi/kulttuuri-ja-vapaa-aika/liikunta/retkeily-ja-ulkoilu/laavut-kodat-ja-nuotiopaikat/",
+        "tourism": "picnic_site"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          24.6348672,
+          60.2697246
+        ],
+        "type": "Point"
+      },
+      "id": 2919437626,
+      "properties": {
+        "leisure": "firepit"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          24.5560095,
+          60.2934413
+        ],
+        "type": "Point"
+      },
+      "id": 4623471079,
+      "properties": {
+        "leisure": "firepit"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          24.5552907,
+          60.2937497
+        ],
+        "type": "Point"
+      },
+      "id": 4623471080,
+      "properties": {
+        "leisure": "firepit"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          24.6639172,
+          60.3233156
+        ],
+        "type": "Point"
+      },
+      "id": 7505611518,
+      "properties": {
+        "leisure": "firepit"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          24.663705,
+          60.3197603
+        ],
+        "type": "Point"
+      },
+      "id": 7505611519,
+      "properties": {
+        "leisure": "firepit"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          24.6629972,
+          60.3174355
+        ],
+        "type": "Point"
+      },
+      "id": 7505611520,
+      "properties": {
+        "leisure": "firepit"
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}

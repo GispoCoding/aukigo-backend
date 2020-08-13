@@ -1,3 +1,4 @@
+import json
 import os
 
 from django.conf import settings
@@ -80,7 +81,6 @@ class ModelsTest(TestCase):
                           'style': None}
                          )
 
-
 class OsmLoadingTests(TestCase):
     def setUp(self) -> None:
         self.maxDiff = None
@@ -93,7 +93,7 @@ class OsmLoadingTests(TestCase):
         self.loader = OsmLoader()
 
     def test_with_firepit_points_multiple_times(self):
-        features = self.loader._overpass_xml_to_geojson_features(read_json("firepit.osm"))
+        features = self.loader._overpass_xml_to_geojson_features(read_test_data("firepit.osm"))
         self.assertEqual(len(features), 7)
         self.loader._synchronize_features(self.layer, self.area, features)
         ids, new_ids = self.loader._synchronize_features(self.layer, self.area, features)
@@ -103,7 +103,7 @@ class OsmLoadingTests(TestCase):
         self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 7)
 
     def test_with_hiking_routes(self):
-        features = self.loader._overpass_xml_to_geojson_features(read_json("hiking_routes.osm"))
+        features = self.loader._overpass_xml_to_geojson_features(read_test_data("hiking_routes.osm"))
         self.assertEqual(len(features), 462)
         ids, new_ids = self.loader._synchronize_features(self.layer, self.area, features)
         self.assertEqual(len(ids), 462)
@@ -114,7 +114,7 @@ class OsmLoadingTests(TestCase):
 
     def test_with_firepit_points(self):
         self.maxDiff = None
-        data = read_json("firepit.osm")
+        data = read_test_data("firepit.osm")
 
         features = self.loader._overpass_xml_to_geojson_features(data)
         self.assertEqual(len(features), 7)
@@ -144,8 +144,13 @@ class OsmLoadingTests(TestCase):
                     'center': [24.60960395, 60.309802350000005, 8]}
         self.assertEqual(response, expected)
 
+        geojson_response = self.client.get(
+            reverse("osm_geojsons", kwargs={'layer': self.layer.pk, 'gtype': 'POINT'})).json()
+        expected = json.loads(read_test_data("expected_firepit.json"))
+        self.assertEqual(geojson_response, expected)
+
     def test_with_administrative_boundary(self):
-        features = self.loader._overpass_xml_to_geojson_features(read_json("administrative_boundary.osm"))
+        features = self.loader._overpass_xml_to_geojson_features(read_test_data("administrative_boundary.osm"))
         ids, new_ids = self.loader._synchronize_features(self.layer, self.area, features)
         self.assertEqual(len(ids), 85)
         self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 11)
@@ -153,7 +158,7 @@ class OsmLoadingTests(TestCase):
         self.assertEqual(OsmPolygon.objects.filter(layers=self.layer).count(), 8)
 
     def test_with_deleted_features_removes_existing(self):
-        features = self.loader._overpass_xml_to_geojson_features(read_json("firepit.osm"))
+        features = self.loader._overpass_xml_to_geojson_features(read_test_data("firepit.osm"))
         self.loader._synchronize_features(self.layer, self.area, features)
         ids, new_ids = self.loader._synchronize_features(self.layer, self.area, features[:-2])
         self.assertEqual(len(ids), 5)
@@ -161,7 +166,7 @@ class OsmLoadingTests(TestCase):
         self.assertEqual(OsmPoint.objects.filter(layers=self.layer).count(), 5)
 
     def test_with_deleted_features_removes_existing2(self):
-        features = self.loader._overpass_xml_to_geojson_features(read_json("firepit.osm"))
+        features = self.loader._overpass_xml_to_geojson_features(read_test_data("firepit.osm"))
         self.loader._synchronize_features(self.layer, self.area, features)
         ids, new_ids = self.loader._synchronize_features(self.layer, self.area, [])
         self.assertEqual(ids, set())
@@ -172,7 +177,7 @@ class OsmLoadingTests(TestCase):
     def test_with_deleted_features_removes_existing3(self):
         layer2 = OsmLayer.objects.create(name="test2")
         layer2.areas.add(self.area)
-        features = self.loader._overpass_xml_to_geojson_features(read_json("firepit.osm"))
+        features = self.loader._overpass_xml_to_geojson_features(read_test_data("firepit.osm"))
         self.loader._synchronize_features(self.layer, self.area, features)
         self.loader._synchronize_features(layer2, self.area, features)
         ids, new_ids = self.loader._synchronize_features(self.layer, self.area, [])
@@ -184,7 +189,7 @@ class OsmLoadingTests(TestCase):
 
 
 # Helper functions
-def read_json(fixture):
+def read_test_data(fixture: str) -> str:
     with open(os.path.join(settings.TEST_DATA_DIR, fixture)) as f:
         data = f.read()
     return data

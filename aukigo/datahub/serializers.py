@@ -129,19 +129,19 @@ class VectorTileBasemapSerializer(BasemapSerializer):
 class OsmPointSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = OsmPoint
-        fields = '__all__'
+        exclude = ('layers',)
         geo_field = "geom"
 
 
 class OsmLineSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = OsmLine
-        fields = '__all__'
+        exclude = ('layers',)
         geo_field = "geom"
 
 
 class OsmPolygonSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = OsmPolygon
-        fields = '__all__'
+        exclude = ('layers',)
         geo_field = "geom"
