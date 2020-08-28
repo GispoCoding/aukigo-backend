@@ -1,0 +1,24 @@
+[
+  {
+    "model": "datahub.wmtsbasemap",
+    "pk": 1,
+    "fields": {
+      "name": "NLS Finland Taustakartta",
+      "attribution": "<a href='https://www.maanmittauslaitos.fi/en/opendata-licence-cc40'>NLS Finland</a>",
+      "url": "https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/WMTSCapabilities.xml",
+      "layer": "taustakartta",
+      "tile_matrix_set": "WGS84_Pseudo-Mercator"
+    }
+  },
+  {
+    "model": "datahub.wmtsbasemap",
+    "pk": 2,
+    "fields": {
+      "name": "NLS Finland Terrain map",
+      "attribution": "<a href='https://www.maanmittauslaitos.fi/en/opendata-licence-cc40'>NLS Finland</a>",
+      "url": "https://avoin-karttakuva.maanmittauslaitos.fi/avoin/wmts/1.0.0/WMTSCapabilities.xml",
+      "layer": "maastokartta",
+      "tile_matrix_set": "WGS84_Pseudo-Mercator"
+    }
+  }
+]
