@@ -101,7 +101,7 @@
   },
   {
     "model": "datahub.osmlayer",
-    "pk": 5,
+    "pk": 4,
     "fields": {
       "tags": "[\"building=church\", \"amenity=place_of_worship\", \"building=mosque\", \"building=synagogue\", \"tourism=attraction\", \"historic=memorial\", \"building=temple\", \"tourism=museum\", \"tourism=viewpoint\", \"historic~castle.*\", \"historic=monument\", \"historic=tomb\", \"historic=wayside_shrine\", \"leisure=park\", \"leisure=sauna\", \"amenity=sauna\", \"amenity=nightclub\", \"amenity=cinema\", \"amenity=theatre\", \"leisure=stadium\", \"building=stadium\", \"amenity=library\", \"amenity=casino\", \"leisure=fitness_centre\", \"leisure=sports_centre\", \"leisure~swimming.*\", \"leisure=water_park\", \"tourism=zoo\", \"man_made=pier\", \"leisure=pitch\", \"sport=soccer\", \"sport=basketball\", \"sport=athletics\"]",
       "_geom_types": null,
