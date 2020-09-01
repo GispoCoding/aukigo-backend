@@ -10,7 +10,7 @@ from django.db import DEFAULT_DB_ALIAS, connections
 from django.db.models import QuerySet
 from django_better_admin_arrayfield.models.fields import ArrayField
 
-from .utils import (GeomType, polygon_to_overpass_bbox)
+from .utils import (GeomType, polygon_to_overpass_bbox, IS_CURRENTLY_OPEN_FUNCTION)
 
 logger = logging.getLogger(__name__)
 
@@ -102,8 +102,6 @@ class Layer(models.Model):
             vector_layers = osm_layer.views
         return vector_layers
 
-
-
     def __str__(self):
         return self.name
 
@@ -171,13 +169,14 @@ class OsmLayer(Layer):
         """
         # Inspired by https://adamj.eu/tech/2019/04/29/create-table-as-select-in-django/
         if geom_type not in self.geom_types:
-            queryset = geom_type.osm_model.objects.filter(layers=self)
+            queryset = (geom_type.osm_model.objects.filter(layers=self)
+                        .extra(select= {'currently_open': "is_currently_open(tags->>'opening_hours')"}))
             compiler = queryset.query.get_compiler(using=using)
             sql, params = compiler.as_sql()
             connection = connections[DEFAULT_DB_ALIAS]
             sql = sql.replace('::bytea', '')  # Use geom as is, do not convert it to byte array
             view_name = self._get_view_name_for_type(geom_type)
-            sql = f'CREATE OR REPLACE VIEW {view_name} AS {sql}'
+            sql = IS_CURRENTLY_OPEN_FUNCTION + f'\n CREATE OR REPLACE VIEW {view_name} AS {sql}'
             logger.debug(sql)
             with connection.cursor() as cursor:
                 cursor.execute(sql, params)

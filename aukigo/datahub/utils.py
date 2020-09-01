@@ -96,3 +96,60 @@ def model_tag_to_overpass_tag(tag: str) -> str:
     else:
         logger.warning(f"Possibly invalid tag: '{tag}'")
     return guess
+
+
+IS_CURRENTLY_OPEN_FUNCTION = '''
+CREATE OR REPLACE FUNCTION is_currently_open(hours varchar) RETURNS bool AS $$ 
+DECLARE
+	dy varchar := lower(substring(to_char(NOW(), 'Dy') for 2));
+	raw_str varchar;
+	part varchar;
+	dates varchar;
+	date_1 varchar;
+	date_2 varchar;
+	time_1 varchar;
+	time_2 varchar;
+	times varchar;
+	days varchar ARRAY := ARRAY['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'];
+	
+BEGIN
+	foreach part in array string_to_array(hours, ';')
+	loop
+		IF part = '24/7' THEN 
+			RETURN true;
+		END IF;
+		raw_str := trim(part);
+		dates := lower(split_part(raw_str, ' ', 1));
+		date_1 := split_part(dates, '-', 1);
+		date_2 := split_part(dates, '-', 2);
+		times := split_part(raw_str, ' ', 2);
+		time_1 := split_part(times, '-', 1);
+		time_2 := split_part(times, '-', 2);
+		
+	
+		IF position('-' in dates) <= 0 THEN
+			date_2 := date_1;
+		END IF;
+		
+		IF position('-' in times) <= 0 THEN
+			time_2 := time_1;
+		END IF;
+		
+		IF (array_position(days, dy) >= array_position(days, date_1) 
+		AND array_position(days, dy) <= array_position(days, date_2)) THEN
+			IF (time_1::time, time_2::time) OVERLAPS (NOW()::time, NOW()::time) THEN 
+				RETURN true;
+			END IF;
+		END IF;
+		
+	end loop;
+	
+    RETURN false;
+EXCEPTION
+	WHEN others THEN
+		BEGIN
+			RETURN false;
+		END;
+END;
+$$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT;
+'''
