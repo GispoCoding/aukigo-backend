@@ -98,10 +98,22 @@ def model_tag_to_overpass_tag(tag: str) -> str:
     return guess
 
 
+# noinspection SqlNoDataSourceInspection
 IS_CURRENTLY_OPEN_FUNCTION = '''
-CREATE OR REPLACE FUNCTION is_currently_open(hours varchar) RETURNS bool AS $$ 
+CREATE OR REPLACE FUNCTION is_currently_open(
+	hours varchar
+) 
+RETURNS bool 
+LANGUAGE plpgsql 
+IMMUTABLE 
+RETURNS NULL ON NULL INPUT
+PARALLEL SAFE
+
+AS $is_currently_open$ 
 DECLARE
-	dy varchar := lower(substring(to_char(NOW(), 'Dy') for 2));
+	curr_date_time timestamp with time zone := NOW() AT TIME ZONE 'Europe/Helsinki';
+	curr_time time := curr_date_time::time;
+	dy varchar := lower(substring(to_char(curr_date_time, 'Dy') for 2));
 	raw_str varchar;
 	part varchar;
 	dates varchar;
@@ -111,7 +123,6 @@ DECLARE
 	time_2 varchar;
 	times varchar;
 	days varchar ARRAY := ARRAY['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su'];
-	
 BEGIN
 	foreach part in array string_to_array(hours, ';')
 	loop
@@ -137,7 +148,7 @@ BEGIN
 		
 		IF (array_position(days, dy) >= array_position(days, date_1) 
 		AND array_position(days, dy) <= array_position(days, date_2)) THEN
-			IF (time_1::time, time_2::time) OVERLAPS (NOW()::time, NOW()::time) THEN 
+			IF (time_1::time, time_2::time) OVERLAPS (curr_time, curr_time) THEN 
 				RETURN true;
 			END IF;
 		END IF;
@@ -151,5 +162,5 @@ EXCEPTION
 			RETURN false;
 		END;
 END;
-$$ LANGUAGE plpgsql IMMUTABLE RETURNS NULL ON NULL INPUT;
+$is_currently_open$;
 '''

@@ -118,6 +118,7 @@ class AreaOfInterest(models.Model):
         return self.name
 
 
+# noinspection SqlNoDataSourceInspection
 class OsmLayer(Layer):
     """
     Base layer that will be shown to the client
@@ -168,22 +169,21 @@ class OsmLayer(Layer):
         :return:
         """
         # Inspired by https://adamj.eu/tech/2019/04/29/create-table-as-select-in-django/
-        if geom_type not in self.geom_types:
-            queryset = (geom_type.osm_model.objects.filter(layers=self)
-                        .extra(select= {'currently_open': "is_currently_open(tags->>'opening_hours')"}))
-            compiler = queryset.query.get_compiler(using=using)
-            sql, params = compiler.as_sql()
-            connection = connections[DEFAULT_DB_ALIAS]
-            sql = sql.replace('::bytea', '')  # Use geom as is, do not convert it to byte array
-            view_name = self._get_view_name_for_type(geom_type)
-            sql = IS_CURRENTLY_OPEN_FUNCTION + f'\n CREATE OR REPLACE VIEW {view_name} AS {sql}'
-            logger.debug(sql)
-            with connection.cursor() as cursor:
-                cursor.execute(sql, params)
+        queryset = (geom_type.osm_model.objects.filter(layers=self)
+                    .extra(select={'currently_open': "is_currently_open(tags->>'opening_hours')"}))
+        compiler = queryset.query.get_compiler(using=using)
+        sql, params = compiler.as_sql()
+        connection = connections[DEFAULT_DB_ALIAS]
+        sql = sql.replace('::bytea', '')  # Use geom as is, do not convert it to byte array
+        view_name = self._get_view_name_for_type(geom_type)
+        sql = IS_CURRENTLY_OPEN_FUNCTION + f'\n CREATE OR REPLACE VIEW {view_name} AS {sql}'
+        logger.debug(sql)
+        with connection.cursor() as cursor:
+            cursor.execute(sql, params)
 
+        if geom_type not in self.geom_types:
             if self.attribution is None or "osm" not in self.attribution or "open" not in self.attribution.lower():
                 self.attribution = "<a href='http://openstreetmap.org'>OSM contributors</a>"
-
             self._geom_types.append(geom_type.name)
             self.save()
 
