@@ -1,5 +1,5 @@
 celery==4.4.5
-Django==3.0.7
+Django==3.1.16
 django-dotenv==1.4.2
 django-cors-headers==3.4.0
 django-better-admin-arrayfield==1.1.0
