@@ -33,9 +33,9 @@ host instead of localhost if using other host.
     DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
    
        
-    SQL_DATABASE=covid_19_dev
-    SQL_USER=covid_19_dev_user
-    SQL_PASSWORD=covid_19_pwd
+    SQL_DATABASE=aukigo_dev
+    SQL_USER=aukigo_dev_user
+    SQL_PASSWORD=aukigo_pwd
     SQL_HOST=localhost
     SQL_PORT=5434
     DATABASE=postgres
