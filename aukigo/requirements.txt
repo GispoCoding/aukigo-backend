@@ -3,7 +3,7 @@ Django==3.1.8
 django-dotenv==1.4.2
 django-cors-headers==3.4.0
 django-better-admin-arrayfield==1.1.0
-djangorestframework==3.11.0
+djangorestframework==3.11.2
 djangorestframework-gis==0.15
 gdal==3.0.3
 gunicorn==20.0.4
